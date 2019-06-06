@@ -1,20 +1,26 @@
 //TBD: License. CC vs GPL
-
 "use strict;"
-//RESOURCES
-var cfg = require('../config.js');
-var pixel = require("node-pixel");
+
 var fs = require("fs");
+var five = require("johnny-five");
+var pixel = require("node-pixel");
+var tmi = require("tmi.js");
 var zlib = require("zlib");
-//BOTS
+
+var events = require('./event_handlers');
+var cfg = require('./test_config.js');
+// var cfg = require('../config.js');
 var pbot = require('./pbot/pbot.js');
 var fbot = require('./fbot/fbot.js');
 var ebot = require('./ebot/ebot.js');
 //var xbot = require('./xbot/xbot.js'); //DEV ONLY
 
+var client = new tmi.client(cfg.options);
+client.connect();
+events.registerHandlers(client);
+
 //SET UP ARDUINO ON USB
-var five = require("johnny-five");
-var ports = [
+const ports = [
 	{ id: "EBOT", port: "COM4" },
 	{ id: "PBOT1", port: "COM6" },
 	{ id: "PBOT3", port: "COM8" },
@@ -29,33 +35,6 @@ var ports = [
 	//{ id: "PBOT1", port: "/dev/cu.usbmodem14231" } //Sparkfun multi-USB cable
 ];
 
-//CONNECT TO IRC
-var tmi = require("tmi.js");
-var options = {
-	options: {
-		debug: true,
-		//clientId: "na for now"
-	},
-	connection: {
-		cluster: "aws",
-		reconnect: true
-	},
-	identity: { //Bot account
-		username: cfg.twBotUsr,
-		password: cfg.twBotKey
-	},
-	channels:  ["laboratory424", "#chatrooms:258148726:2bc7bf7b-7fe7-49e9-a6d7-43567491e167"]//Channel, bots room
-	//The format is #chatrooms:<channel ID>:<room UUID>
-	//You create a room on Twitch and then you need to find the channel ID and the room UUID
-	//chat rooms: https://dev.twitch.tv/docs/irc/chat-rooms/
-	//So once you make the room, replace its ID here: #chatrooms:258148726:<room UUID>
-	//How to check where it came from:
-	//channel === '#laboratory424', or channel === '#chatrooms:id:uuid'
-	//Where id:uuid is the channel ID and room ID
-};
-
-var client = new tmi.client(options);
-client.connect();
 
 //ARDUINO INIT/CONFIG
 new five.Boards(ports).on("ready", function () {
@@ -148,27 +127,7 @@ new five.Boards(ports).on("ready", function () {
 });
 
 //////////////////////////////////////////
-client.on('connected', function (address, port) {
-	client.action("laboratory424", "KB-23 Bot Commander Ready...");
-});
 
-//////////////////////////////////////////
-client.on('chat', function (channel, user, message, self) {
-	var bProcessed = false;
-
-	if (!bProcessed) {
-		bProcessed = processEvent(user, message);	//EVENTS
-	}
-	if (!bProcessed) {
-		bProcessed = processUser(user, message);	//USER
-	}
-	if (!bProcessed) {
-		bProcessed = processCommand(user, message);	//COMMANDS
-	}
-	if (!bProcessed) {
-		bProcessed = ebot.processEmote(client, user, message);	//EMOTES
-	}
-});
 
 //////////////////////////////////////////
 client.on("subscription", (channel, username, method, message, userstate) => {
@@ -335,70 +294,11 @@ client.on("raided", (channel, username, viewers) => {
 //////////////////////////////////////////
 //Process an event in chat
 //Follow and Tip handled via StreamElements user in Chat. Cheer and Sub handled above
-function processEvent(user, message) {
-	var time = 500;
-	var bProcessed = false;
-	var weaponSelect;
 
-	if (user.username == "streamelements" && message.includes("following")) {
-		weaponSelect = Math.floor(Math.random() * 2); //random number, 0 - 2
-		if (weaponSelect == 0) { //Throw BBs
-			fbot.throwbbs();
-		} else if (weaponSelect == 1) { //Shoot a single ball on follow.
-			fbot.addToQue(client, user, "fire1", true);
-		}
-
-		bProcessed = true;
-	} else if (user.username == "streamelements" && message.includes("tipped")) {
-		weaponSelect = Math.floor(Math.random() * 2); //random number, 0 - 2
-
-		//Try to capture numerical amount for future bot rewards and triggers.
-		var pos = message.search("$"); //loc of amount
-		var amount;
-		var substr;
-		var subCharArray;
-		if (pos > 0) {
-			substr = message.substring(pos + 1, message.length - 1);
-			subCharArray = substr.split(" ");
-			amount = subCharArray[0];
-			console.log("Tip Amount Captured: " + amount);
-		}
-		//client.action("laboratory424", "KB-23 captured Tip Event! Amount: " + amount);
-
-		//Throw BBs
-		fbot.throwbbs();
-		//Launcher
-		fbot.addToQue(client, user, "fire2", true);
-
-		bProcessed = true;
-	} else if (user.username == "streamelements" && message.includes("PPB01") && !message.includes('@')) {
-		fbot.addToQue(client, user, "fire1", true);
-	} else if (user.username == "streamelements" && message.includes("PPB03") && !message.includes('@')) {
-		fbot.addToQue(client, user, "fire3", true);
-	}
-
-	return bProcessed;
-}
 
 //////////////////////////////////////////
 //Do something special for users.
-function processUser(user, message) {
-	var bProcessed = false;
 
-	if(cfg.specialUsrPPB.includes(user.username) && message.includes("fire")){
-		fbot.addToQue(client, user, "fire4", true);
-		bProcessed = true;
-	}else if(cfg.specialUsrBBL.includes(user.username) && message.includes("throw")){
-		fbot.throwbbs();
-		bProcessed = true;
-	}else if(cfg.adminUsr.includes(user.username) && message.includes("doit")){
-		//fbot.throwbbs();
-		fbot.addToQue(client, user, "fire2", true);
-		bProcessed = true;
-	}
-
-	return bProcessed;
-}
 
 //////////////////////////////////////////
 //Main Bot Control Commands

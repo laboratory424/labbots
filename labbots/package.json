@@ -1,0 +1,25 @@
+{
+  "name": "labbots",
+  "version": "0.0.1",
+  "description": "Library of bots for the https://www.twitch.tv/laboratory424 stream",
+  "main": "index.js",
+  "dependencies": {
+    "firmata": "^0.19.1",
+    "node-pixel": "^0.10.2",
+    "tmi.js": "^1.4.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/laboratory424/lab-bots.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/laboratory424/lab-bots/issues"
+  },
+  "homepage": "https://github.com/laboratory424/lab-bots#readme"
+}
