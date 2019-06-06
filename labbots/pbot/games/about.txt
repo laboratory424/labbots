@@ -1,0 +1,1 @@
+Support/API for games. Games should be contained in their own folders in here for now.
