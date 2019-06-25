@@ -1,15 +1,17 @@
+var tmi = require("tmi.js"); //so we have access to chat services.
 var five = require("johnny-five");
 var ports = [
 	{ id: "FBOT", port: "COM5" }
 ];
 
+var tmiClient = null;
 var gSpeed = 100;
 var gTurretAngle = 80;
 var gWaistAngle = 120;
 var gBallCount = 1;
-//var gCheerBallInc = 25; //Every 25 bits adds a ball.
-//var gMaxBalls = 6;//Maximum capacity to shoot.
-//var gTotalBits = 5;
+
+var gLoaderDone = true;
+var gLoaderJammed = false;
 var gMagEmpty = false;
 var gLostShots = 0;
 var gReloadMode = false;
@@ -36,18 +38,41 @@ new five.Boards(ports).on("ready", function () {
 	fbotHW.launcher = new five.Motor({ pin: 5, board: this.byId("FBOT") });
 	fbotHW.magSensor = new five.Sensor({ pin: "A0", threshold: 600, board: this.byId("FBOT") });
 	init();
+	fbotHW.loader.on('move:complete',loaderDone);
 });
+
+//Maintained by loader servo. Called when rotation command finished.
+function loaderDone(){
+	//console.log("LOADER DONE!");
+	gLoaderDone = true;
+}
+
+function checkLoader(){
+	if(gLoaderDone != true){
+		tmiClient.action("laboratory424", "! - ALERT - ! LOADER IS JAMMED.");
+		fbotHW.loader.stop();//should stop rotation immediately, no current draw. Retract? move.to(165)
+		gLoaderJammed = true;//Stop queue
+		//Stop the queue. Need separate var to control.
+		//NOTE: When queue restarts, we need to set gLoaderDone = true!!!!, reinit fbot.
+	}
+}
 
 ///////////////////////////////////////////
 //PUBLIC FUNCTIONS
 ///////////////////////////////////////////
 function init(){
-  	rotate2(fbotHW.armL,0,true);
-	rotate2(fbotHW.armR,gTurretAngle,true);//30 - 120 valid for this servo!
-	rotate2(fbotHW.waist,gWaistAngle,true);//45-180 safe for now
-	rotate2(fbotHW.loader,100,true);
+  	rotate(fbotHW.armL,0);
+	rotate(fbotHW.armR,gTurretAngle);//30 - 120 valid for this servo!
+	rotate(fbotHW.waist,gWaistAngle);//45-180 safe for now
+	rotate(fbotHW.loader,100);
 	fbotHW.launcher.stop();//make sure off.
 }
+
+///////////////////////////////////////////
+function setTMIClient(theClient){
+	tmiClient = theClient;
+}
+
 ///////////////////////////////////////////
 //For now, this is async since only does one thing.
 //Eventually may need to add it to a bb queue
@@ -108,21 +133,21 @@ function processCommands(commStr){
 		switch(command){
 
 		case "tla"://BB throw arm
-			if(posOK(angle,true)){rotate2(fbotHW.armL,angle,true);}
+			if(posOK(angle,true)){rotate(fbotHW.armL,angle);}
 			break;
 		case "la"://PPB Loader
-			if(angle <= 180 && angle >= 0){rotate2(fbotHW.loader,angle,true);}
+			if(angle <= 180 && angle >= 0){rotate(fbotHW.loader,angle);}
 			break;
 		case "ta":
 			if(posOK(angle,true)){
 				gTurretAngle = angle;
-				rotate2(fbotHW.armR,gTurretAngle,true,true);
+				rotate(fbotHW.armR,gTurretAngle);
 			}
 			break;
 		case "wa":
 			if(posOK(angle,true)){
 				gWaistAngle = angle;
-				rotate2(fbotHW.waist,angle,true);
+				rotate(fbotHW.waist,angle);
 			}
     	break;
 		case "ms":
@@ -138,17 +163,17 @@ function processCommands(commStr){
 			break;
 		case "wc":
 			gWaistAngle = 120;
-			rotate2(fbotHW.waist,gWaistAngle,true);
+			rotate(fbotHW.waist,gWaistAngle);
 			break;
 		case "tc":
 			gTurretAngle = 80;
-			rotate2(fbotHW.armR,gTurretAngle,true);
+			rotate(fbotHW.armR,gTurretAngle);
 			break;
 		case "fire":
 			if(angle == ""){angle = 1;}
 			time += randomFire(angle,time);
 			break;
-    case "reload":
+    case "reloaded":
 				gReloadMode = false;
 				console.log("ReloadMode set to: "+gReloadMode);
 				//checkMag();//Update mag value
@@ -186,50 +211,38 @@ function processCommands(commStr){
 // Random fire handles all shooting. Current behavior is first shot is wherever it is pointed.
 // Other consecutive shots are random. Future: firing patterns. Queue works ok, but current
 // command sequence is lost if mag is emptied during sequence. Issue with losing coords if resume
-// too.
-/*
-  Alca: You can write lambda functions like this: "() => {}" -- then you don't
-  need the function keyword "function() {}". And you can even drop the
-  brackets for implicit return (not that setTimeout cares about the return,
-  so it's just convenience)
-  Check this: setTimeout(() => something.andThis(), 1000);
-
-   setTimeout(() => fbotHW.launcher.start)gSpeed), time += 200);
-  */
-
 function randomFire(balls, time){
-		//checkMag();
 		if(!gMagEmpty){
 			for(var i = 0; i < balls; i++){
 				if(i == 0){//Startup case
 					setTimeout(function(){checkMag()}, time +=200);
 					//setTimeout(function(){if(gMagEmpty){gLostShots++}}, time +=200);
 					setTimeout(function(){if(!gMagEmpty){fbotHW.launcher.start(gSpeed)}}, time+=200); //Speed motor up
-					setTimeout(function(){if(!gMagEmpty){rotate2(fbotHW.loader,165,true)}}, time+=2500); //2500, Wait for motor, Drop Ball
-					setTimeout(function(){if(!gMagEmpty){rotate2(fbotHW.loader,70,true)}}, time+=100); //was 500, Push into motor
-					if(balls <= 1){ //If we are going to randomfire, don't reset pos.
-						setTimeout(function(){if(!gMagEmpty){rotate2(fbotHW.loader,100,true)}}, time+=1000); //Return to start pos
-					}
+					setTimeout(function(){if(!gMagEmpty){rotate(fbotHW.loader,165)}}, time+=2500); //Wait 2.5s for motor, Drop Ball
+					setTimeout(function(){if(!gMagEmpty){rotate(fbotHW.loader,70)}}, time+=750); //Wait .75s, Push into motor
+					setTimeout(function(){if(!gMagEmpty){checkLoader()}}, time+=800);//verify no jams
+					setTimeout(function(){if(!gMagEmpty){rotate(fbotHW.loader,100)}}, time+=500); //Wait 0.5s, Return to start pos
+					
 				}else{
 					setTimeout(function(){checkMag()}, time +=200);
 					//setTimeout(function(){if(gMagEmpty){gLostShots++}}, time +=200);
-
 					//setTimeout(function(){if(gMagEmpty){fbotHW.launcher.stop()}}, time+=200);//stop motor immediately if empty
 					setTimeout(function(){if(!gMagEmpty){randomSpeed(fbotHW)}}, time+=200);//Adjust Motor speed
 					setTimeout(function(){if(!gMagEmpty){randomWaistCoord(fbotHW)}}, time+=1000);//give motor 1s to set.
 					setTimeout(function(){if(!gMagEmpty){randomTurretCoord(fbotHW)}}, time+=300);
 	
-					setTimeout(function(){if(!gMagEmpty){rotate2(fbotHW.loader,165,true)}}, time+=300); //Wait for motor, Drop Ball
-					setTimeout(function(){if(!gMagEmpty){rotate2(fbotHW.loader,70,true)}}, time+=500); //Push into motor
-					setTimeout(function(){if(!gMagEmpty){rotate2(fbotHW.loader,100,true)}}, time+=500); //Return to start pos
+					setTimeout(function(){if(!gMagEmpty){rotate(fbotHW.loader,165)}}, time+=300); //Wait for motor, Drop Ball
+					setTimeout(function(){if(!gMagEmpty){rotate(fbotHW.loader,70)}}, time+=750); //Push into motor
+					setTimeout(function(){if(!gMagEmpty){checkLoader()}}, time+=800);//verify no jams
+					setTimeout(function(){if(!gMagEmpty){rotate(fbotHW.loader,100)}}, time+=500); //Return to start pos
 				}
 			}
 			//ISSUE: If lost shot, lost coords. Could bypass center arm/waist. 
 			//ISSUE: If crash, lose queue. So, need to write out.
 			setTimeout(function(){fbotHW.launcher.stop()}, time+=200); //was 500. Stop motor
-			setTimeout(function(){rotate2(fbotHW.loader,100,true)}, time+=200); //was 500. Return to start pos
-			setTimeout(function(){rotate2(fbotHW.armR,80,true)}, time+=500); //was 1000. center arm
-			setTimeout(function(){rotate2(fbotHW.waist,120,true)}, time+=500); //was 1000. center waist
+			setTimeout(function(){rotate(fbotHW.loader,100)}, time+=200); //was 500. Return to start pos
+			setTimeout(function(){rotate(fbotHW.armR,80)}, time+=500); //was 1000. center arm
+			setTimeout(function(){rotate(fbotHW.waist,120)}, time+=500); //was 1000. center waist
 			//Do we need to compensate for lost shots?
 			/*setTimeout(function(){
 				if(gLostShots>0){
@@ -256,13 +269,15 @@ function validateCommand(client, user, commStr){
 	var i;
 	
 	//Can only be a-z, A-Z, 0-9, period.
-	//Note: If I included username at some point, may need to strip of name before check.
+	//Note: If I included username at some point, may need to strip off name before check.
 	if(bIsOK && !approvedChars.test(commStr)){
 		errMessage = "Request contains invalid character.";
 		bIsOK = false;
 	}
 
 	//TBD: should split commands and check for more than 4 commands. only 4 allowed.
+	//But, there is an exception in the case of eye animation. So, need to process based
+	//on command: fb1, fb1a...
 	if(bIsOK){
 		commands = commStr.split(".");
 		for (i = 0; i < commands.length; i++){
@@ -362,12 +377,15 @@ function validateCommand(client, user, commStr){
 ////////////////////////////////////////
 function processQueue(){
 	var commStr;
-	//console.log("commDome: "+gCommandDone);
-	//console.log("gMag: "+gMagEmpty);
-	//console.log("commArrLen: "+gCommandQue.length);
+	
 	checkMag();
-	if(gCommandDone === true && !gMagEmpty && gCommandQue.length > 0){ //gReloadMode?
-    commStr = gCommandQue.shift();
+	//console.log("gCommandDone: "+gCommandDone);
+	//console.log("gMagEmpty: "+gMagEmpty);
+	//console.log("gCommandQue.length: "+gCommandQue.length);
+	//console.log("gReloadMode: "+gReloadMode);
+	//if(gCommandDone === true && gReloadMode == false && !gMagEmpty && gCommandQue.length > 0){
+	if(gCommandDone === true && !gMagEmpty && !gLoaderJammed && gCommandQue.length > 0){
+    	commStr = gCommandQue.shift();
 		gCommandDone = false;
 		processCommands(commStr);
 		//console.log("commStr: "+commStr);
@@ -395,7 +413,7 @@ function randomTurretCoord(fbotHW){
   var max = Math.floor(81);
 
   curTurretAngle = Math.floor(Math.random() * (max-min)) + min;
-  rotate2(fbotHW.armR,curTurretAngle,true);
+  rotate(fbotHW.armR,curTurretAngle);
 }
 //////////////////////////////////////////
 function randomWaistCoord(fbotHW){
@@ -405,7 +423,7 @@ function randomWaistCoord(fbotHW){
   var max = Math.floor(181);
 
   curWaistAngle = Math.floor(Math.random() * (max-min)) + min;
-  rotate2(fbotHW.waist,curWaistAngle,true);
+  rotate(fbotHW.waist,curWaistAngle);
 }
 //////////////////////////////////////////
 function randomSpeed(fbotHW){
@@ -417,7 +435,7 @@ function randomSpeed(fbotHW){
   fbotHW.launcher.start(curSpeed);//Adjust Motor speed
 }
 //////////////////////////////////////////
-function rotate(servo,angle, b180 = false, bfixJit = false ){
+/*function rotate(servo,angle, b180 = false, bfixJit = false ){
   var svoAngle = Math.round(angle/2); //map from 0-360 to 0-180
   if(servo){
     if(!b180){
@@ -428,19 +446,14 @@ function rotate(servo,angle, b180 = false, bfixJit = false ){
       servo.to(angle);//Actual passed angle. NOTE: Can add a time param to slow speed down
     }
   }
-}
+}*/
 
 //////////////////////////////////////////
-function rotate2(servo,angle, b180 = false, bfixJit = false){
-  var svoAngle = Math.round(angle/2); //map from 0-360 to 0-180
+//Rotate Servo. Only valid for 0-180 servos.
+function rotate(servo,angle, time = 400, bfixJit = false){
   if(servo){
-    if(!b180){
-      svoAngle = jitterFix(svoAngle);
-      servo.to(svoAngle); //mapped angle. NOTE: Can add a time param to slow speed down
-    }else{
       if(bfixJit == true){angle = jitterFix(angle);}
-      servo.to(angle,400);//Actual passed angle. NOTE: Can add a time param to slow speed down
-    }
+      servo.to(angle,time);//Use time to slow down transition
   }
 }
 //////////////////////////////////////////
@@ -496,3 +509,4 @@ function jitterFix(angle){
 module.exports.throwbbs = throwbbs;
 //module.exports.magEmpty = magEmpty;
 module.exports.addToQue = addToQue;
+module.exports.setTMIClient = setTMIClient;

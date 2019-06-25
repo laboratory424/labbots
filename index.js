@@ -37,6 +37,7 @@ var options = {
 
 var client = new tmi.client(options);
 client.connect();
+fbot.setTMIClient(client);//testing, pass off client to fbot so can talk.
 
 //////////////////////////////////////////
 client.on('connected', function (address, port) {

@@ -137,7 +137,7 @@ function init(pBotID){
 	}
 }
 /////////////////////////////////////////////////
-function processCommands(commStr){
+function processCommands(client, user, message){
 	var bIsOKToShow = false;
 	var commands = commStr.split(".", 145);// [0]=Bot, [1]=color, [2]=Pixel, can stack 12 pixel commands
 	var pixel;
@@ -146,44 +146,8 @@ function processCommands(commStr){
 	var p;
 
 	switch(commands[0]){
-		case "!pb1ax":
-			var pic = "";
-			var time = 500;//Default
-			var i;
-			var bGoodDrawing = true;
-			var picArray = [];
-			var picDiffArray = [];
-			var pixMap;
-
-			//Let check all the data sent before we update display
-			for (i = 1; i < commands.length; i++) {
-				if (isNaN(commands[i])) {	//If time entered, skip validation.
-					if (isValidDrawMap(commands[i]) == false) {
-						bGoodDrawing = false;
-						break;
-					}
-				}
-			}
-
-			if (bGoodDrawing == true) {
-				clearPanel(1);
-				for (i = 1; i < commands.length; i++) {
-					if (!isNaN(commands[i])) { //Did they submit a time?
-						time = commands[i];
-						if (time < 300) { time = 300; }//TEMP, testing locking to 300ms
-					} else {
-						pixMap = rleToPixPanel(commands[i]); //convert to pix map
-						picArray.push(pixMap); //put into array for processing
-					}
-				}
-				//diff frames.
-				picDiffArray = diffPanelFrames(picArray);
-				//loop
-				for (j = 0; j < picDiffArray.length; j++) {
-					gPBOT1PicArray.push(picDiffArray[j]); //put into array for processing
-				}
-				loopDiffFramesPB1(time);//Loop forever.
-			}
+		case "TBD":
+			//Move commmands here one by one.
 			break;
 		}
 }

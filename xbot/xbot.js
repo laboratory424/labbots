@@ -33,12 +33,15 @@ var xbotHW = {
 var gXBOT1IntervalPtr = null;
 var gXBOT1PicArray = new Array();
 
+var gRadarIntervalPtr = null;
+var gRadarArray = new Array();
+
 new five.Boards(ports).on("ready", function () {
 	console.log("XBOT Board ready!");
 
 	//XBOT
 	  //xbot.xbotHW.svo_c = new five.Servo.Continuous({pin:10, board:this.byId("XBOT")});
-	  //xbotHW.svo_c = new five.Servo({pin:10, type: "continuous", board:this.byId("XBOT")});
+	  xbotHW.svo_c = new five.Servo({pin:10, type: "continuous", board:this.byId("XBOT")});
 	  //xbotHW.svo_i = new five.Servo({pin:9, board:this.byId("XBOT")});
 	  //xbot.xbotHW.led = new five.Led({pin:2, board:this.byId("XBOT")});
 	  xbotHW.strip1 = new pixel.Strip({
@@ -68,8 +71,9 @@ function init(){
     var color1 = '#FFFF00';//#FFFF00, daa520
     //var color2 = '#ff0000';
     //Strip1
-    xbotHW.strip1.color(color1);
-    xbotHW.strip1.show();
+    //xbotHW.strip1.color(color1);
+    //xbotHW.strip1.show();
+    powerupEyes();
     //Strip2
     //xbotHW.strip2.color(color2);
     //xbotHW.strip2.show();
@@ -79,7 +83,7 @@ function init(){
     //svo_i
     //rotate(xbotHW.svo_c,90,true);//Assume 0-180
     //svo_c
-    //xbotHW.svo_c.cw(.3);
+    xbotHW.svo_c.cw(.01);
     //xbotHW.svo_c.stop();
 }
 ///////////////////////////////////////////////////////////
@@ -106,11 +110,11 @@ function processCommands(commStr){
       switch(data1){
         case "cw":
           console.log("IN CW COMMAND");
-          xbotHW.svo_c.cw(.5);
+          xbotHW.svo_c.cw(.1);
           break;
         case "ccw":
           console.log("IN CCW COMMAND");
-          xbotHW.svo_c.ccw(.5);
+          xbotHW.svo_c.ccw(.1);
           break;
         case "stop":
         console.log("IN STOP COMMAND");
@@ -141,6 +145,34 @@ function processCommands(commStr){
           xbotHW.led.off();
           break;
       }
+      break;
+    case "!xb1r": //!xb1r.cw[speed], !xb1r.[s][dir][time]. !xb1r.2r300.3l400.0s300
+      var data;
+      var move;
+      var speed;
+      var delay;
+      var j;
+
+      gRadarArray = [];//Purge array
+      clearInterval(gRadarIntervalPtr);
+      for(j = 1; j < commands.length;j++){
+        //TBD: Iterate and Validate
+        data = commands[j].split(/[0-9]+/);
+		    move = data[1];//r,l,s
+		    data = commands[j].split(/[a-z]+/);
+        speed = data[0];//0-9 , 0.01 - 0.09
+        if(j == 1){
+          delay = data[1];
+          if(delay > 3000){
+            delay = 3000;
+          }else if(delay < 250){
+            delay = 250;
+          }
+        }//ms
+        //if(OK)
+        gRadarArray.push(commands[j]);
+      }
+      loopRadar(delay);//fixed time for now.
       break;
     case "!xb1a"://Temp, for fbot eye animation/drawing. !xb1e.300.3j1e7k
       var fbotMap;
@@ -182,6 +214,78 @@ function processCommands(commStr){
       clearEyes();
       setTimeout(function () { xbotHW.strip1.show(); }, 300);
       break;
+    case "!xb1p":
+      var panelColor = commands[1];//hexcolor
+      var isOK  = /^#[0-9A-F]{6}$/i.test(panelColor);
+      if(isOK){
+        clearEyes();
+		    setTimeout(function (){xbotHW.strip1.color(panelColor); xbotHW.strip1.show();}, 500);
+      }else{
+        console.log("BAD HEX EYE COLOR: "+panelColor);
+      }
+      break;
+    case "!xb1i":
+      clearEyes();
+      gRadarArray = [];//Purge array
+      clearInterval(gRadarIntervalPtr);
+      init();
+      break;
+  }
+}
+//////////////////////////////////////////
+/*
+etisdew: const opts = {} opts.time = 100; settimeoutfoo(opts);
+etisdew: then update via update to opts.time
+
+Alca: Without the actual functionality:function setimeoutfoo(opts) { setTimeout(() => setimeoutfoo(opts), opts.time); }
+browsers requestAnimationFrame canvas
+can use pointer to timeout and clear.
+
+https://codepen.io/Alca/pen/MMmKyx?editors=0010
+*/
+function loopRadar(time) {
+  var i = 0;
+	gRadarIntervalPtr = setInterval(function () {
+		if (i == gRadarArray.length) {i = 0;}
+		moveRadar(gRadarArray[i]);
+		i++;
+	}, time);
+}
+//////////////////////////////////////////
+function moveRadar(commandStr){
+  var data;
+  var move;
+  var speed;
+  var delay;
+
+  if(commandStr != 's'){
+    data = commandStr.split(/[0-9]+/);
+    move = data[1];//r,l,s
+    data = commandStr.split(/[a-z]+/);
+    speed = data[0];//0-9 , 0.01 - 0.09
+    delay = data[1];//ms
+
+    //For now, speed range is 1-9, or 0.01-0.09
+    if(speed > 9){
+      speed = 9;
+    }else if(speed < 1){
+      speed = 1;
+    }
+    speed = speed/100;
+  }else{
+    move = 's';
+  }
+  
+  switch(move){
+    case "r":
+      xbotHW.svo_c.cw(speed);
+      break;
+    case "l":
+      xbotHW.svo_c.ccw(speed);
+      break;
+    case "s":
+    xbotHW.svo_c.stop();
+    break;
   }
 }
 
@@ -281,15 +385,20 @@ function increment(servo, bCW = true, speed){
   /////////////////////////////////////////////////////////
   //draw fbot eyes from an pbot map. Use for all in one convert and draw.
   //j1j2j3e4k5k6k7k8k9k10k11
-  function drawFbotEyes(pbMap){
+  /*function drawFbotEyes(pbMap){
     var i;
     var curColorChar;
     var curEyePix;
     var pix;
     var pixArray = pbMap.split(/[0-9]+/);//Get array of color letters, 144
-    var leftEye = [1,24,25,48,49,72,73,96,97,120,121,144,143,122,119,98,95,74,71,50,47,26,23,2];
-    var rightEye = [11,14,35,38,59,62,83,86,107,110,131,134,133,132,109,108,85,84,61,60,37,36,13,12];
+    //var rightEye = [1,24,25,48,49,72,73,96,97,120,121,144,143,122,119,98,95,74,71,50,47,26,23,2];
+    //var leftEye = [11,14,35,38,59,62,83,86,107,110,131,134,133,132,109,108,85,84,61,60,37,36,13,12];
+    var rightEye = [1,24,25,48,49,72,73,96,97,120,121,144,143,122,119,98,95,74,71,50,47,26,23,2];
+    var leftEye = [11,14,35,38,59,62,83,86,107,110,131,134,133,132,109,108,85,84,61,60,37,36,13,12];
   
+    rightEye.reverse();
+    leftEye.reverse();
+
     for(i = 0; i < 24; i++){
       //Left Eye
       curEyePix = leftEye[i] - 1;
@@ -306,7 +415,7 @@ function increment(servo, bCW = true, speed){
       pix = xbotHW.strip1.pixel(i+24);
       pix.color(curHexColor);
     }
-  }
+  }*/
 
   /////////////////////////////////////////////////////////
   //Convert a Pbot pixel grid to fbot eye grid.
@@ -316,10 +425,14 @@ function increment(servo, bCW = true, speed){
     var curColorChar;
     var curEyePix;
     var pixArray = pbMap.split(/[0-9]+/);//Get array of color letters, 144
-    var leftEye = [1,24,25,48,49,72,73,96,97,120,121,144,143,122,119,98,95,74,71,50,47,26,23,2];
-    var rightEye = [11,14,35,38,59,62,83,86,107,110,131,134,133,132,109,108,85,84,61,60,37,36,13,12];
+    var rightEye = [1,24,25,48,49,72,73,96,97,120,121,144,143,122,119,98,95,74,71,50,47,26,23,2];
+    var leftEye = [11,14,35,38,59,62,83,86,107,110,131,134,133,132,109,108,85,84,61,60,37,36,13,12];
     var fbMap = ''; //1 color char per pix, no number info.
 
+    rightEye.reverse();//TBD: hardcode later
+    leftEye.reverse();//TBD: Hardcode later.
+    //ALCA: take it to chome dev tools to transform., Chrome->F12 run some code, copy paste result.
+    //FF: under tools tab
     for(i = 0; i < 24; i++){
       //Left Eye
       curEyePix = leftEye[i] - 1;
@@ -479,6 +592,20 @@ function clearEyes(){
   gXBOT1PicArray = [];//Purge array
   xbotHW.strip1.color("#000000");
   setTimeout(function () { xbotHW.strip1.color("#000000") }, 100);//Necessary to make sure interval clears first. LAME!
+}
+
+/////////////////////////////////////////////////////////
+//Simple boot animation for followBot Eyes.
+function powerupEyes(){
+  var time = 0;
+  clearEyes();
+  //Yellow Eyes opening
+  setTimeout(function () { processCommands("!xb1d.60e2f8e4f8e2f60e") }, time+=200);
+  setTimeout(function () { processCommands("!xb1d.48e2f8e4f8e4f8e4f8e2f48e") }, time+=200);
+  setTimeout(function () { processCommands("!xb1d.36e2f8e4f8e4f8e4f8e4f8e4f8e2f36e") }, time+=200);
+  setTimeout(function () { processCommands("!xb1d.24e2f8e4f8e4f8e4f8e4f8e4f8e4f8e4f8e2f24e") }, time+=200);
+  setTimeout(function () { processCommands("!xb1d.12e2f8e4f8e4f8e4f8e4f8e4f8e4f8e4f8e4f8e4f8e2f12e") }, time+=200);
+  setTimeout(function () { processCommands("!xb1d.2f8e4f8e4f8e4f8e4f8e4f8e4f8e4f8e4f8e4f8e4f8e4f8e2f4f8e4f8e4f8e4f8e4f8e2f") }, time+=200);
 }
 
 //////////////////////////////////////////
