@@ -1,3 +1,8 @@
+var five = require("johnny-five");
+var ports = [
+	{ id: "FBOT", port: "COM5" }
+];
+
 var gSpeed = 100;
 var gTurretAngle = 80;
 var gWaistAngle = 120;
@@ -7,7 +12,7 @@ var gBallCount = 1;
 //var gTotalBits = 5;
 var gMagEmpty = false;
 var gLostShots = 0;
-//var gReloadMode = false;
+var gReloadMode = false;
 //Queue Mgmt
 var gCommandQue = new Array();
 var gCommandDone = true;
@@ -22,11 +27,22 @@ var fbotHW = {
 	magSensor: null
 };
 
+new five.Boards(ports).on("ready", function () {
+	console.log("FBOT Board ready!");
+	fbotHW.armL = new five.Servo({ pin: 9, startAt: 0, board: this.byId("FBOT") });
+	fbotHW.armR = new five.Servo({ pin: 10, board: this.byId("FBOT") });
+	fbotHW.waist = new five.Servo({ pin: 6, board: this.byId("FBOT") });
+	fbotHW.loader = new five.Servo({ pin: 7, board: this.byId("FBOT") });
+	fbotHW.launcher = new five.Motor({ pin: 5, board: this.byId("FBOT") });
+	fbotHW.magSensor = new five.Sensor({ pin: "A0", threshold: 600, board: this.byId("FBOT") });
+	init();
+});
+
 ///////////////////////////////////////////
 //PUBLIC FUNCTIONS
 ///////////////////////////////////////////
-function init(fbotHW){
-  rotate2(fbotHW.armL,0,true);
+function init(){
+  	rotate2(fbotHW.armL,0,true);
 	rotate2(fbotHW.armR,gTurretAngle,true);//30 - 120 valid for this servo!
 	rotate2(fbotHW.waist,gWaistAngle,true);//45-180 safe for now
 	rotate2(fbotHW.loader,100,true);
@@ -133,7 +149,8 @@ function processCommands(commStr){
 			time += randomFire(angle,time);
 			break;
     case "reload":
-				//gReloadMode = false;
+				gReloadMode = false;
+				console.log("ReloadMode set to: "+gReloadMode);
 				//checkMag();//Update mag value
 			//gMagEmpty = false;//mag is full-ish
 			//gCommandDone = true;//BAD, Hack. Temp, testing! Will lose current shot/command request.
@@ -189,13 +206,17 @@ function randomFire(balls, time){
 					//setTimeout(function(){if(gMagEmpty){gLostShots++}}, time +=200);
 					setTimeout(function(){if(!gMagEmpty){fbotHW.launcher.start(gSpeed)}}, time+=200); //Speed motor up
 					setTimeout(function(){if(!gMagEmpty){rotate2(fbotHW.loader,165,true)}}, time+=2500); //2500, Wait for motor, Drop Ball
-					setTimeout(function(){if(!gMagEmpty){rotate2(fbotHW.loader,70,true)}}, time+=500); //Push into motor
-					setTimeout(function(){if(!gMagEmpty){rotate2(fbotHW.loader,100,true)}}, time+=1000); //Return to start pos
+					setTimeout(function(){if(!gMagEmpty){rotate2(fbotHW.loader,70,true)}}, time+=100); //was 500, Push into motor
+					if(balls <= 1){ //If we are going to randomfire, don't reset pos.
+						setTimeout(function(){if(!gMagEmpty){rotate2(fbotHW.loader,100,true)}}, time+=1000); //Return to start pos
+					}
 				}else{
 					setTimeout(function(){checkMag()}, time +=200);
 					//setTimeout(function(){if(gMagEmpty){gLostShots++}}, time +=200);
+
+					//setTimeout(function(){if(gMagEmpty){fbotHW.launcher.stop()}}, time+=200);//stop motor immediately if empty
 					setTimeout(function(){if(!gMagEmpty){randomSpeed(fbotHW)}}, time+=200);//Adjust Motor speed
-					setTimeout(function(){if(!gMagEmpty){randomWaistCoord(fbotHW)}}, time+=1000);//1000
+					setTimeout(function(){if(!gMagEmpty){randomWaistCoord(fbotHW)}}, time+=1000);//give motor 1s to set.
 					setTimeout(function(){if(!gMagEmpty){randomTurretCoord(fbotHW)}}, time+=300);
 	
 					setTimeout(function(){if(!gMagEmpty){rotate2(fbotHW.loader,165,true)}}, time+=300); //Wait for motor, Drop Ball
@@ -205,10 +226,10 @@ function randomFire(balls, time){
 			}
 			//ISSUE: If lost shot, lost coords. Could bypass center arm/waist. 
 			//ISSUE: If crash, lose queue. So, need to write out.
-			setTimeout(function(){rotate2(fbotHW.loader,100,true)}, time+=500); //Return to start pos
-			setTimeout(function(){fbotHW.launcher.stop()}, time+=500); //Stop motor
-			setTimeout(function(){rotate2(fbotHW.armR,80,true)}, time+=1000); //center arm
-			setTimeout(function(){rotate2(fbotHW.waist,120,true)}, time+=1000); //center waist
+			setTimeout(function(){fbotHW.launcher.stop()}, time+=200); //was 500. Stop motor
+			setTimeout(function(){rotate2(fbotHW.loader,100,true)}, time+=200); //was 500. Return to start pos
+			setTimeout(function(){rotate2(fbotHW.armR,80,true)}, time+=500); //was 1000. center arm
+			setTimeout(function(){rotate2(fbotHW.waist,120,true)}, time+=500); //was 1000. center waist
 			//Do we need to compensate for lost shots?
 			/*setTimeout(function(){
 				if(gLostShots>0){
@@ -345,7 +366,7 @@ function processQueue(){
 	//console.log("gMag: "+gMagEmpty);
 	//console.log("commArrLen: "+gCommandQue.length);
 	checkMag();
-	if(gCommandDone === true && !gMagEmpty && gCommandQue.length > 0){
+	if(gCommandDone === true && !gMagEmpty && gCommandQue.length > 0){ //gReloadMode?
     commStr = gCommandQue.shift();
 		gCommandDone = false;
 		processCommands(commStr);
@@ -359,9 +380,9 @@ function checkMag(){
 	if(fbotHW.magSensor != null){
 		value = fbotHW.magSensor.scaleTo(0,1023);
 		//console.log("Sensor: "+value);
-		if(value > 600){
+		if(value > 500){
 			gMagEmpty = true;
-			//gReloadMode = true;
+			gReloadMode = true;
 		}else{
 			gMagEmpty = false;
 		}
@@ -472,8 +493,6 @@ function jitterFix(angle){
 }
 
 //////////////////////////////////////////
-module.exports.fbotHW = fbotHW;
-module.exports.init = init;
 module.exports.throwbbs = throwbbs;
-module.exports.magEmpty = magEmpty;
+//module.exports.magEmpty = magEmpty;
 module.exports.addToQue = addToQue;

@@ -1,3 +1,8 @@
+var five = require("johnny-five");
+var ports = [
+	{ id: "EBOT", port: "COM4" }
+];
+
 var ebotHW = {
 	led: null,
 	eyeL: null,
@@ -6,10 +11,22 @@ var ebotHW = {
 	browL: null,
 	browR: null
 };
-exports.ebotHW = ebotHW;
+
+new five.Boards(ports).on("ready", function () {
+	console.log("EBOT Board ready!");
+
+	//EBOT
+	ebotHW.led = new five.Led({ pin: 10, board: this.byId("EBOT") });
+	ebotHW.eyeL = new five.Servo({ pin: 11, board: this.byId("EBOT") });
+	ebotHW.eyeR = new five.Servo({ pin: 9, board: this.byId("EBOT") });
+	ebotHW.mouth = new five.Servo({ pin: 6, board: this.byId("EBOT") });
+	ebotHW.browL = new five.Servo({ pin: 5, board: this.byId("EBOT") });
+	ebotHW.browR = new five.Servo({ pin: 3, board: this.byId("EBOT") });
+	init();
+});
 
 ///////////////////////////////////////////
-exports.init = function(ebotHW){
+function init(){
 	//Heartbeat.
 	ebotHW.led.blink(500);
 	//init bot positions.
@@ -17,7 +34,7 @@ exports.init = function(ebotHW){
 }
 
 ///////////////////////////////////////////
-exports.processCommands = function(client, user, commStr){
+function processCommands(client, user, commStr){
   var commands = commStr.split(".");
   var command;
   var partPos; //Array containing part index[0] and angle[1]
@@ -279,7 +296,7 @@ exports.processCommands = function(client, user, commStr){
 }
 
 //////////////////////////////////////////
-exports.processEmote = function(client, user, message){
+function processEmote(client, user, message){
   var time = 1000;
 
   //Ideas for Subs: Animated emotes instead of basic static. Access to other emotes like LUL.
@@ -429,3 +446,7 @@ function animateES(ebotHW,rePos,lePos,time){
 function animateM(ebotHW,mPos,time){
   setTimeout(function(){rotate(ebotHW.mouth,mPos)}, time);
 }
+
+/////////////////////////////////////////
+module.exports.processCommands = processCommands;
+module.exports.processEmote = processEmote;

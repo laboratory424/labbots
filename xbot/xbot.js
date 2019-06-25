@@ -11,6 +11,16 @@ strip = new pixel.Strip({
   gamma: 2.8,
 });
 */
+var pixel = require("node-pixel");
+var five = require("johnny-five");
+var ports = [
+  { id: "XBOT", port: "COM11" }
+  //{ id: "LBOT", port: "COM10" }
+	//{ id: "TBOT", port: "COM10" }
+  //MAC TESTING ONLY
+	//{ id: "PBOT2", port: "/dev/cu.usbmodem1411" }, //Basic USB cable
+	//{ id: "PBOT1", port: "/dev/cu.usbmodem14231" } //Sparkfun multi-USB cable
+];
 
 var xbotHW = {
   svo_c: null,    //continouous
@@ -20,8 +30,42 @@ var xbotHW = {
 	led: null       //Standard IO/LED
 };
 
+var gXBOT1IntervalPtr = null;
+var gXBOT1PicArray = new Array();
+
+new five.Boards(ports).on("ready", function () {
+	console.log("XBOT Board ready!");
+
+	//XBOT
+	  //xbot.xbotHW.svo_c = new five.Servo.Continuous({pin:10, board:this.byId("XBOT")});
+	  //xbotHW.svo_c = new five.Servo({pin:10, type: "continuous", board:this.byId("XBOT")});
+	  //xbotHW.svo_i = new five.Servo({pin:9, board:this.byId("XBOT")});
+	  //xbot.xbotHW.led = new five.Led({pin:2, board:this.byId("XBOT")});
+	  xbotHW.strip1 = new pixel.Strip({
+		board: this.byId("XBOT"),
+		controller: "FIRMATA",
+		strips: [ {pin: 6, length: 48}],
+		gamma: 2.8,
+	  });
+    init();
+    
+    	//LBOT
+	//lights = new five.Led({pin:8, board:this.byId("LBOT")});
+	//lights.off();
+
+	//TBOT
+	/*targ1 = new five.Sensor({pin:"A0", threshold: 100, board:this.byId("LBOT")});
+	targ1.on("change", function() {
+			console.log(this.value);//temp
+		if(targ1.value > 100){
+			console.log("HIT!");//temp
+			//Could turn on LED like on LBOT
+		}
+	});*/
+});
+
 function init(){
-    var color1 = '#6441a5';
+    var color1 = '#FFFF00';//#FFFF00, daa520
     //var color2 = '#ff0000';
     //Strip1
     xbotHW.strip1.color(color1);
@@ -31,29 +75,29 @@ function init(){
     //xbotHW.strip2.show();
     //IO,LED
     //xbotHW.led.blink(500);
-    xbotHW.led.off();
+    //xbotHW.led.off();
     //svo_i
-    rotate(xbotHW.svo_c,90,true);//Assume 0-180
+    //rotate(xbotHW.svo_c,90,true);//Assume 0-180
     //svo_c
     //xbotHW.svo_c.cw(.3);
-    xbotHW.svo_c.stop();
+    //xbotHW.svo_c.stop();
 }
 ///////////////////////////////////////////////////////////
 /*COMMANDS:
   svoi.[angleInDeg]
-  svoc.cw, svoc.ccw
+  svoc.cw, svoc.ccw, svox.stop
   str1.pix.[pixNumInt].[#hexcolor], str1.strip.[#hexcolor]
   str2.pix.[pixNumInt].[#hexcolor], str2.strip.[#hexcolor]
   led.on, led.off
 */
 function processCommands(commStr){
   var commands = commStr.split(".");
-  var device = commands[0];
-  var data1 = commands[1];//angle,direction, pix/strip, on/off
-  var data2 = commands[2];//pix# / Hex color (strip)
-  var data3 = commands[3];//Hex color (pix)
+  //var device = commands[0]; //!xb1, !xb1e, !xb1csv...
+  //var data1 = commands[1];//time,angle,direction, pix/strip, on/off
+  //var data2 = commands[2];//pix# / Hex color (strip)
+  //var data3 = commands[3];//Hex color (pix)
 
-  switch(device){
+  switch(commands[0]){
     case "svoi"://svo_i: Move to angle
       if(posOK(data1,true)){rotate(xbotHW.svo_i,data1,true);}
       break;
@@ -61,13 +105,17 @@ function processCommands(commStr){
         console.log("IN SVOC COMMAND");
       switch(data1){
         case "cw":
-            console.log("IN CW COMMAND");
+          console.log("IN CW COMMAND");
           xbotHW.svo_c.cw(.5);
           break;
         case "ccw":
-            console.log("IN CCW COMMAND");
+          console.log("IN CCW COMMAND");
           xbotHW.svo_c.ccw(.5);
           break;
+        case "stop":
+        console.log("IN STOP COMMAND");
+        xbotHW.svo_c.stop();
+        break;
       }
       break;
     case "str1"://strip: change pixel/color
@@ -93,6 +141,46 @@ function processCommands(commStr){
           xbotHW.led.off();
           break;
       }
+      break;
+    case "!xb1a"://Temp, for fbot eye animation/drawing. !xb1e.300.3j1e7k
+      var fbotMap;
+      var pbPixMap
+      var time = 500;//Default
+      var i;
+
+      clearEyes();
+      for (i = 1; i < commands.length; i++) {
+        if (!isNaN(commands[i])) { //Did they submit a time?
+          time = commands[i];
+          if (time < 100) { time = 100; }//Until we resolve time-collision issue, force a min of 300ms.
+        } else {
+          //console.log("Comms: "+commands[i]);
+          pbPixMap = rleToPixPanel(commands[i]); //convert from rle to pix map
+          //console.log("pbPixMap: "+pbPixMap);
+          fbotMap = buildFbotMap(pbPixMap)//convert from pbot map to fbot map
+          //console.log("FBOTMAP: "+fbotMap);
+          gXBOT1PicArray.push(fbotMap); //Push the 48pix map onto array.
+        }
+      }
+      loopFramesEyes(time);//Loop forever.
+      break;
+    case "!xb1d"://Temp, for fbot eye animation/drawing. !xb1e.300.3j1e7k
+      var fbotMap;
+      var pbPixMap
+      var i;
+
+      clearEyes();
+      pbPixMap = rleToPixPanel(commands[1]); //convert from rle to pix map
+      //drawFbotEyes(pbPixMap);//Map to eyes and draw.
+      fbotMap = buildFbotMap(pbPixMap)//convert from pbot map to fbot map
+      gXBOT1PicArray.push(fbotMap);
+      //console.log("ARRAY: "+gXBOT1PicArray);
+      drawEyes(fbotMap);
+      xbotHW.strip1.show();
+      break;
+    case "!xb1x":
+      clearEyes();
+      setTimeout(function () { xbotHW.strip1.show(); }, 300);
       break;
   }
 }
@@ -160,9 +248,238 @@ function increment(servo, bCW = true, speed){
     }
   }
 
+/////////////////////////////////////////////////////////////
+	//convert rle to diffs, then animate.
+	//	3j1e7k -> j1j2j3e4k5k6k7k8k9k10k11
+	//	3j1e8k -> j1j2j3e1k5k6k7k8k9k10k11k12
+	//	-------------------------------------------------
+	function rleToPixPanel(rle){
+	  var curPix = 0;
+	  var pixNumMap;
+	  var colorMap;
+	  var pixMap = "";
 
+	  if(rle === undefined){
+		  return;//do nothing, run away.
+	  }
+	  pixNumMap = rle.split(/[a-z]+/);//Should break right after before the first number
+	  colorMap = rle.split(/[0-9]+/); // ,a,e,a...
+	  for(var i = 0; i < pixNumMap.length; i++) {
+			for(var j = 0; j < pixNumMap[i]; j++){
+				pixMap = pixMap + colorMap[i+1] + curPix;
+				curPix++;
+				if(curPix > 143)break;
+			}
+	  }
+		//console.log("PIX NUMS: " + pixNumMap);
+		//console.log("PIX COLORS: " + colorMap);
+	  //console.log("PIX MAP: " + pixMap);
+
+	  return pixMap;
+	}
+
+  /////////////////////////////////////////////////////////
+  //draw fbot eyes from an pbot map. Use for all in one convert and draw.
+  //j1j2j3e4k5k6k7k8k9k10k11
+  function drawFbotEyes(pbMap){
+    var i;
+    var curColorChar;
+    var curEyePix;
+    var pix;
+    var pixArray = pbMap.split(/[0-9]+/);//Get array of color letters, 144
+    var leftEye = [1,24,25,48,49,72,73,96,97,120,121,144,143,122,119,98,95,74,71,50,47,26,23,2];
+    var rightEye = [11,14,35,38,59,62,83,86,107,110,131,134,133,132,109,108,85,84,61,60,37,36,13,12];
+  
+    for(i = 0; i < 24; i++){
+      //Left Eye
+      curEyePix = leftEye[i] - 1;
+      curColorChar = pixArray[curEyePix];
+      curHexColor = getPictureColor(curColorChar);
+      pix = xbotHW.strip1.pixel(i);
+      pix.color(curHexColor);
+    }
+    for(i = 0; i < 24; i++){
+      //Right Eye
+      curEyePix = rightEye[i] - 1;
+      curColorChar = pixArray[rightEye[i]-1];
+      curHexColor = getPictureColor(curColorChar);
+      pix = xbotHW.strip1.pixel(i+24);
+      pix.color(curHexColor);
+    }
+  }
+
+  /////////////////////////////////////////////////////////
+  //Convert a Pbot pixel grid to fbot eye grid.
+  //j1j2j3e4k5k6k7k8k9k10k11
+  function buildFbotMap(pbMap){
+    var i;
+    var curColorChar;
+    var curEyePix;
+    var pixArray = pbMap.split(/[0-9]+/);//Get array of color letters, 144
+    var leftEye = [1,24,25,48,49,72,73,96,97,120,121,144,143,122,119,98,95,74,71,50,47,26,23,2];
+    var rightEye = [11,14,35,38,59,62,83,86,107,110,131,134,133,132,109,108,85,84,61,60,37,36,13,12];
+    var fbMap = ''; //1 color char per pix, no number info.
+
+    for(i = 0; i < 24; i++){
+      //Left Eye
+      curEyePix = leftEye[i] - 1;
+      curColorChar = pixArray[curEyePix];
+      //console.log("curColorChar: " + curColorChar);
+      fbMap += curColorChar;
+      //console.log("fbMap: " + fbMap);
+    }
+    for(i = 0; i < 24; i++){
+      //Right Eye
+      curEyePix = rightEye[i] - 1;
+      curColorChar = pixArray[rightEye[i]-1];
+      fbMap += curColorChar;
+    }
+    return fbMap;
+  }
+
+  /////////////////////////////////////////////////
+	//Must represent each color as single digit/char
+	//Probably move to getHexColor() and use this code in place of it.
+	function getPictureColor(pixColorComm){
+    var hexColor;//hex value or similar.
+
+    switch(pixColorComm){
+    case "a"://red
+      hexColor = "#ff0000";
+      break;
+      case "b"://green!
+      //hexColor = "#00ff00";
+      hexColor = "#008000";
+      break;
+      case "c"://blue
+      hexColor = "#0000ff";
+      break;
+      case "d"://White
+      hexColor = "#ffffff";
+      break;
+      case "e"://Off/Black
+      hexColor = "#000000";
+      break;
+      case "f"://Yellow
+      hexColor = "#FFFF00";
+      break;
+      case "g"://Maroon!
+      hexColor = "#800000";
+      break;
+      case "h"://Purple!
+      hexColor = "#800080";
+      break;
+      case "i"://Twitch Purple!
+      hexColor = "#6441a5";
+      break;
+      case "j"://Navy!
+      hexColor = "#000080";
+      break;
+      case "k"://Dark Green, ok, but dimmer very similar to green
+      hexColor = "#006400";
+      break;
+      case "l"://gold -no
+      hexColor = "#ffd700";
+      break;
+      case "m"://khaki-no
+      hexColor = "#f0e68c";
+      break;
+      case "n"://goldenrod, ok but still bright
+      hexColor = "#daa520";
+      break;
+      case "o"://cyan - bright
+      hexColor = "#00ffff";
+      break;
+      case "p"://Teal!
+      hexColor = "#008080";
+      break;
+      case "q"://Dark Tur! (similar to teal)
+      hexColor = "#00ced1";
+      break;
+      case "r"://Orange
+      hexColor = "#ffa500";
+      break;
+      case "s"://Dark Orange (better, but still bright)
+      hexColor = "#ff8c00";
+      break;
+      case "t"://Orange Red! (s bit bright but ok)
+      hexColor = "#ff4500";
+      break;
+      case "u"://pink, ok!
+      hexColor = "#ffc0cb";
+      break;
+      case "v"://deep pink, too bright
+      hexColor = "#ff1493";
+      break;
+      case "w"://light salmon,bright
+      hexColor = "#ffa07a";
+      break;
+      case "x"://Gray1 (gary)
+      hexColor = "#858d86";
+      break;
+      case "y"://Gray2 (gary)
+      hexColor = "#4c504d";
+      break;
+    default:
+      hexColor = "#000000";
+      //hexColor = pixColorComm;//TEMP! To figure out basic color hex values
+      //bRequestOK = false;//TEMP, add back in later while working with colors.
+      break;
+    }
+
+    return hexColor;
+  }
+
+
+//////////////////////////////////////////////
+	//Use 1 char for a color, no pix info, in order from 1-48
+  function drawEyes(colorStr){
+    var curColor;
+    var pix;
+    var commandStrLen;
+    var curPix = 0;
+
+    //Protect against empty command call.
+    if(colorStr === undefined){
+      return;//do nothing, run away.
+    }
+
+    commandStrLen = colorStr.length;
+    //console.log("LENGTH: " + commandStrLen);
+
+    for (var i = 0; i < commandStrLen; i++) {
+    if(isNaN(colorStr.charAt(i)) && colorStr.charAt(i) !=' '){
+        curColor = getPictureColor(colorStr.charAt(i));
+        pix = xbotHW.strip1.pixel(curPix);
+        pix.color(curColor);
+        curPix++;
+        if(curPix > 47)break;//No more pixels to process, leave.
+      }
+    }
+  }
+/////////////////////////////////////////////////////////
+//loopFrames()
+//	Takes an array of RLE picture commands and displayes them based on time. Loops forever.
+//	TBD: Add param and associated command to only go through animation once. Useful for gaming/effects
+/////////////////////////////////////////////////////////
+function loopFramesEyes(time) {
+  var i = 0;
+  //console.log("ARRAY: " + gXBOT1PicArray);
+	gXBOT1IntervalPtr = setInterval(function () {
+		if (i == gXBOT1PicArray.length) {i = 0;}
+		drawEyes(gXBOT1PicArray[i]);
+		i++;
+		xbotHW.strip1.show();
+	}, time);
+}
+
+/////////////////////////////////////////////////////////
+function clearEyes(){
+  if (gXBOT1IntervalPtr != null) { clearInterval(gXBOT1IntervalPtr); }
+  gXBOT1PicArray = [];//Purge array
+  xbotHW.strip1.color("#000000");
+  setTimeout(function () { xbotHW.strip1.color("#000000") }, 100);//Necessary to make sure interval clears first. LAME!
+}
 
 //////////////////////////////////////////
-module.exports.xbotHW = xbotHW;
-module.exports.init = init;
 module.exports.processCommands = processCommands;

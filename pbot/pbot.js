@@ -6,12 +6,66 @@
 
 //Certain functionality should be pushed into draw folder/file.
 
+var pixel = require("node-pixel");
+var five = require("johnny-five");
+var ports = [
+	{ id: "PBOT1", port: "COM6" },
+	{ id: "PBOT3", port: "COM8" },
+	{ id: "PBOT2", port: "COM9" },
+	{ id: "PBOT4", port: "COM3" }
+];
+
 pbotHW = {
 	pbot1Strip: null,
 	pbot1Strip: null,
 	pbot1Strip: null,
 	pbot1Strip: null
 };
+
+new five.Boards(ports).on("ready", function () {
+	console.log("PBOT Boards ready!");
+
+	var curStripPtr;
+	//PBOT1
+	curStripPtr = new pixel.Strip({
+		board: this.byId("PBOT1"),
+		controller: "FIRMATA",
+		strips: [{ pin: 5, length: 144 },],
+		gamma: 2.8,
+	});
+	setStrip(curStripPtr, 1);
+	curStripPtr.on("ready", function () {init(1);});
+	
+	//PBOT2
+	curStripPtr = new pixel.Strip({
+		board: this.byId("PBOT2"),
+		controller: "FIRMATA",
+		strips: [{ pin: 5, length: 144 },],
+		gamma: 2.8,
+	});
+	setStrip(curStripPtr, 2);
+	curStripPtr.on("ready", function () {init(2);});
+	
+	//PBOT3
+	curStripPtr = new pixel.Strip({
+		board: this.byId("PBOT3"),
+		controller: "FIRMATA",
+		strips: [{ pin: 5, length: 144 },],
+		gamma: 2.8,
+	});
+	setStrip(curStripPtr, 3);
+	curStripPtr.on("ready", function () {init(3);});
+	
+	//PBOT4
+		curStripPtr = new pixel.Strip({
+		board: this.byId("PBOT4"),
+		controller: "FIRMATA",
+		strips: [{ pin: 5, length: 144 },],
+		gamma: 2.8,
+	});
+	setStrip(curStripPtr, 4);
+	curStripPtr.on("ready", function () {init(4);});
+});
 
 gPBOT1IntervalPtr = null;
 gPBOT1PicArray = new Array();
@@ -197,7 +251,7 @@ function setPix(pix, pixColorComm){
 	  var bRequestOK = true;
 
 	  if(pix !== null){
-		  pix.color(this.getHexColor(pixColorComm));
+		  pix.color(getHexColor(pixColorComm));
 	  }
 
 	  return bRequestOK;
@@ -582,7 +636,8 @@ function getHexColor(pixColorComm){
 
     //////////////////////////////////////////////
 		//Always call isValidDrawMap() before drawing
-    function drawPicture(colorStr, strip){
+	function drawPicture(colorStr, pBotID){
+		var strip = getStrip(pBotID);
   	  var curChar;
   	  var curColor;
   	  var pix;
@@ -614,7 +669,7 @@ function getHexColor(pixColorComm){
   			if(curPix > 143)break;
   		}
   	  }
-    }
+	}
   //////////////////////////////////////////////
 	//Use 1 char for a color, no pix info, in order from 1-144
 	//Obsolete for pictures/animations, but may be useful for
@@ -644,6 +699,15 @@ function getHexColor(pixColorComm){
   	  }
     }
 
+/////////////////////////////////////////////////////////////
+//Abstract show() to hide HW. 
+//Ideally, pbot handles this in draw functions, but
+//there are cases where the calling function may want to control
+//when to show. For instance, layering images, timing for all panels, etc.
+	function show(pBotID){
+		var strip = getStrip(pBotID);
+		strip.show();
+	}
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
 	//convert rle to diffs, then animate.
@@ -830,11 +894,15 @@ function loopAllDiffFrames(time) {
 /////////////////////////////////////////////////////////
 function loopFramesPB1(time) {
 	var i = 0;
-	pbot.gPBOT1IntervalPtr = setInterval(function () {
-		if (i == pbot.gPBOT1PicArray.length) {i = 0;}
-		pbot.drawPicture(pbot.gPBOT1PicArray[i], pbot.pbotHW.pbot1Strip);
+
+	console.log("Array Length"+ gPBOT1PicArray.length);
+	console.log("data[0]"+ gPBOT1PicArray[i]);
+
+	gPBOT1IntervalPtr = setInterval(function () {
+		if (i == gPBOT1PicArray.length) {i = 0;}
+		drawPicture(gPBOT1PicArray[i], 1);
 		i++;
-		pbot.pbotHW.pbot1Strip.show();
+		pbotHW.pbot1Strip.show();
 	}, time);
 }
 
@@ -842,7 +910,7 @@ function loopFramesPB2(time) {
 	var i = 0;
 	pbot.gPBOT2IntervalPtr = setInterval(function () {
 		if (i == pbot.gPBOT2PicArray.length) {i = 0;}
-		pbot.drawPicture(pbot.gPBOT2PicArray[i], pbot.pbotHW.pbot2Strip);
+		pbot.drawPicture(pbot.gPBOT2PicArray[i], 2);
 		i++;
 		pbot.pbotHW.pbot2Strip.show();
 	}, time);
@@ -852,7 +920,7 @@ function loopFramesPB3(time) {
 	var i = 0;
 	pbot.gPBOT3IntervalPtr = setInterval(function () {
 		if (i == pbot.gPBOT3PicArray.length) {i = 0;}
-		pbot.drawPicture(pbot.gPBOT3PicArray[i], pbot.pbotHW.pbot3Strip);
+		pbot.drawPicture(pbot.gPBOT3PicArray[i], 3);
 		i++;
 		pbot.pbotHW.pbot3Strip.show();
 	}, time);
@@ -862,7 +930,7 @@ function loopFramesPB4(time) {
 	var i = 0;
 	pbot.gPBOT4IntervalPtr = setInterval(function () {
 		if (i == pbot.gPBOT4PicArray.length) {i = 0;}
-		pbot.drawPicture(pbot.gPBOT4PicArray[i], pbot.pbotHW.pbot4Strip);
+		pbot.drawPicture(pbot.gPBOT4PicArray[i], 4);
 		i++;
 		pbot.pbotHW.pbot4Strip.show();
 	}, time);
@@ -874,10 +942,10 @@ function loopAllFrames(time) {
 		if (i == gPBOT4PicArray.length) {
 			i = 0;
 		}
-		drawPicture(gPBOT1PicArray[i], pbotHW.pbot1Strip);
-		drawPicture(gPBOT2PicArray[i], pbotHW.pbot2Strip);
-		drawPicture(gPBOT3PicArray[i], pbotHW.pbot3Strip);
-		drawPicture(gPBOT4PicArray[i], pbotHW.pbot4Strip);
+		drawPicture(gPBOT1PicArray[i], 1);
+		drawPicture(gPBOT2PicArray[i], 2);
+		drawPicture(gPBOT3PicArray[i], 3);
+		drawPicture(gPBOT4PicArray[i], 4);
 		i++;
 		pbotHW.pbot1Strip.show();
 		pbotHW.pbot2Strip.show();
@@ -890,6 +958,13 @@ function animatePix(pix, color, time) {
 	setTimeout(function () {
 		setPix(pbotHW.pbot1Strip.pixel(pix), color);
 		pbotHW.pbot1Strip.show();
+	}, time);
+}
+
+function animateAllPanelPix(pix, color, time, strip) {
+	setTimeout(function () {
+		setPix(strip.pixel(pix), color);
+		strip.show();
 	}, time);
 }
   //////////////////////////////////////////////
@@ -1066,9 +1141,9 @@ module.exports.gPBOT3IntervalPtr = gPBOT3IntervalPtr;
 module.exports.gPBOT4PicArray = gPBOT4PicArray;
 module.exports.gPBOT4IntervalPtr = gPBOT4IntervalPtr;
 
-module.exports.setStrip = setStrip;
-module.exports.getStrip = getStrip;
-module.exports.init = init;
+//module.exports.setStrip = setStrip;
+//module.exports. = getStrip;
+//module.exports.init = init;
 module.exports.processCommands = processCommands;
 module.exports.generateFrame = generateFrame;
 module.exports.setPix = setPix;
@@ -1081,6 +1156,7 @@ module.exports.getHexColor = getHexColor;
 module.exports.getPictureColor = getPictureColor;
 module.exports.drawPicture = drawPicture;
 module.exports.drawPictureOLD = drawPictureOLD;
+module.exports.show = show;
 module.exports.rleToPixPanel = rleToPixPanel;
 
 module.exports.diffFrames = diffFrames;
@@ -1099,3 +1175,4 @@ module.exports.getSavedDrawing = getSavedDrawing;
 module.exports.loopFramesPB1 = loopFramesPB1;
 module.exports.loopAllFrames = loopAllFrames;
 module.exports.animatePix = animatePix;
+module.exports.animateAllPanelPix = animateAllPanelPix;

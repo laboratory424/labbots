@@ -1,5 +1,3 @@
-//TBD: License. CC vs GPL
-
 "use strict;"
 //RESOURCES
 var cfg = require('../config.js');
@@ -10,24 +8,7 @@ var zlib = require("zlib");
 var pbot = require('./pbot/pbot.js');
 var fbot = require('./fbot/fbot.js');
 var ebot = require('./ebot/ebot.js');
-//var xbot = require('./xbot/xbot.js'); //DEV ONLY
-
-//SET UP ARDUINO ON USB
-var five = require("johnny-five");
-var ports = [
-	{ id: "EBOT", port: "COM4" },
-	{ id: "PBOT1", port: "COM6" },
-	{ id: "PBOT3", port: "COM8" },
-	{ id: "PBOT2", port: "COM9" },
-	{ id: "PBOT4", port: "COM3" },
-	{ id: "FBOT", port: "COM5" }
-	//{ id: "XBOT", port: "COM11" }
-	//{ id: "LBOT", port: "COM10" }
-	//{ id: "TBOT", port: "COM10" }
-	//MAC TESTING ONLY
-	//{ id: "PBOT2", port: "/dev/cu.usbmodem1411" }, //Basic USB cable
-	//{ id: "PBOT1", port: "/dev/cu.usbmodem14231" } //Sparkfun multi-USB cable
-];
+var xbot = require('./xbot/xbot.js'); //DEV ONLY
 
 //CONNECT TO IRC
 var tmi = require("tmi.js");
@@ -57,96 +38,6 @@ var options = {
 var client = new tmi.client(options);
 client.connect();
 
-//ARDUINO INIT/CONFIG
-new five.Boards(ports).on("ready", function () {
-	console.log("### Board ready!");
-
-	//EBOT
-	ebot.ebotHW.led = new five.Led({ pin: 10, board: this.byId("EBOT") });
-	ebot.ebotHW.eyeL = new five.Servo({ pin: 11, board: this.byId("EBOT") });
-	ebot.ebotHW.eyeR = new five.Servo({ pin: 9, board: this.byId("EBOT") });
-	ebot.ebotHW.mouth = new five.Servo({ pin: 6, board: this.byId("EBOT") });
-	ebot.ebotHW.browL = new five.Servo({ pin: 5, board: this.byId("EBOT") });
-	ebot.ebotHW.browR = new five.Servo({ pin: 3, board: this.byId("EBOT") });
-	ebot.init(ebot.ebotHW);
-
-	//FBOT
-	fbot.fbotHW.armL = new five.Servo({ pin: 9, board: this.byId("FBOT") });
-	fbot.fbotHW.armR = new five.Servo({ pin: 10, board: this.byId("FBOT") });
-	fbot.fbotHW.waist = new five.Servo({ pin: 6, board: this.byId("FBOT") });
-	fbot.fbotHW.loader = new five.Servo({ pin: 7, board: this.byId("FBOT") });
-	fbot.fbotHW.launcher = new five.Motor({ pin: 5, board: this.byId("FBOT") });
-	fbot.fbotHW.magSensor = new five.Sensor({ pin: "A0", threshold: 600, board: this.byId("FBOT") });
-	fbot.init(fbot.fbotHW);
-
-	//XBOT
-	  /*xbot.xbotHW.svo_c = new five.Servo.Continuous({pin:10, board:this.byId("XBOT")});
-	  xbot.xbotHW.svo_i = new five.Servo({pin:9, board:this.byId("XBOT")});
-	  xbot.xbotHW.led = new five.Led({pin:2, board:this.byId("XBOT")});
-	  xbot.xbotHW.strip1 = new pixel.Strip({
-		board: this.byId("XBOT"),
-		controller: "FIRMATA",
-		strips: [ {pin: 5, length: 6}, {pin: 6, length: 6}],
-		gamma: 2.8,
-	  });
-	  xbot.init();*/
-
-	var curStripPtr;
-	//PBOT1
-	curStripPtr = new pixel.Strip({
-		board: this.byId("PBOT1"),
-		controller: "FIRMATA",
-		strips: [{ pin: 5, length: 144 },],
-		gamma: 2.8,
-	});
-	pbot.setStrip(curStripPtr, 1);
-	curStripPtr.on("ready", function () {pbot.init(1);});
-	
-	//PBOT2
-	curStripPtr = new pixel.Strip({
-		board: this.byId("PBOT2"),
-		controller: "FIRMATA",
-		strips: [{ pin: 5, length: 144 },],
-		gamma: 2.8,
-	});
-	pbot.setStrip(curStripPtr, 2);
-	curStripPtr.on("ready", function () {pbot.init(2);});
-	
-	//PBOT3
-	curStripPtr = new pixel.Strip({
-		board: this.byId("PBOT3"),
-		controller: "FIRMATA",
-		strips: [{ pin: 5, length: 144 },],
-		gamma: 2.8,
-	});
-	pbot.setStrip(curStripPtr, 3);
-	curStripPtr.on("ready", function () {pbot.init(3);});
-	
-	//PBOT4
-		curStripPtr = new pixel.Strip({
-		board: this.byId("PBOT4"),
-		controller: "FIRMATA",
-		strips: [{ pin: 5, length: 144 },],
-		gamma: 2.8,
-	});
-	pbot.setStrip(curStripPtr, 4);
-	curStripPtr.on("ready", function () {pbot.init(4);});
-
-	//LBOT
-	//lights = new five.Led({pin:8, board:this.byId("LBOT")});
-	//lights.off();
-
-	//TBOT
-	/*targ1 = new five.Sensor({pin:"A0", threshold: 100, board:this.byId("LBOT")});
-	targ1.on("change", function() {
-			console.log(this.value);//temp
-		if(targ1.value > 100){
-			console.log("HIT!");//temp
-			//Could turn on LED like on LBOT
-		}
-	});*/
-});
-
 //////////////////////////////////////////
 client.on('connected', function (address, port) {
 	client.action("laboratory424", "KB-23 Bot Commander Ready...");
@@ -175,14 +66,14 @@ client.on("subscription", (channel, username, method, message, userstate) => {
 	var pic = "1z3r3z3r4z1r2f1r1z1r2f1r3z1r2f1r2f1r6z1r5f1r5z1r3f1r7z1r5f1r3z1r2f1r1f1r2f1r3z1r3f1r1f1r3f4r5f3r5z1r3f1r7z1r1f1r11z1r5z";
 
 	pbot.clearPanel();
-	pbot.drawPicture(pic, pbot.pbotHW.pbot1Strip);
-	pbot.drawPicture(pic, pbot.pbotHW.pbot2Strip);
-	pbot.drawPicture(pic, pbot.pbotHW.pbot3Strip);
-	pbot.drawPicture(pic, pbot.pbotHW.pbot4Strip);
-	pbot.pbotHW.pbot1Strip.show();
-	pbot.pbotHW.pbot2Strip.show();
-	pbot.pbotHW.pbot3Strip.show();
-	pbot.pbotHW.pbot4Strip.show();
+	pbot.drawPicture(pic, 1);
+	pbot.drawPicture(pic, 2);
+	pbot.drawPicture(pic, 3);
+	pbot.drawPicture(pic, 4);
+	pbot.show(1);
+	pbot.show(2);
+	pbot.show(3);
+	pbot.show(4);
 
 	//BBs
 	fbot.throwbbs();
@@ -201,14 +92,14 @@ client.on("resub", (channel, username, months, message, userstate, methods) => {
 	pbot.clearPanel(2);
 	pbot.clearPanel(3);
 	pbot.clearPanel(4);
-	pbot.drawPicture(pic, pbot.pbotHW.pbot1Strip);
-	pbot.drawPicture(pic, pbot.pbotHW.pbot2Strip);
-	pbot.drawPicture(pic, pbot.pbotHW.pbot3Strip);
-	pbot.drawPicture(pic, pbot.pbotHW.pbot4Strip);
-	pbot.pbotHW.pbot1Strip.show();
-	pbot.pbotHW.pbot2Strip.show();
-	pbot.pbotHW.pbot3Strip.show();
-	pbot.pbotHW.pbot4Strip.show();
+	pbot.drawPicture(pic, 1);
+	pbot.drawPicture(pic, 2);
+	pbot.drawPicture(pic, 3);
+	pbot.drawPicture(pic, 4);
+	pbot.show(1);
+	pbot.show(2);
+	pbot.show(3);
+	pbot.show(4);
 
 	//BBs
 	fbot.throwbbs();
@@ -227,14 +118,14 @@ client.on("subgift", (channel, username, streakMonths, recipient, methods, users
 	pbot.clearPanel(2);
 	pbot.clearPanel(3);
 	pbot.clearPanel(4);
-	pbot.drawPicture(pic, pbot.pbotHW.pbot1Strip);
-	pbot.drawPicture(pic, pbot.pbotHW.pbot2Strip);
-	pbot.drawPicture(pic, pbot.pbotHW.pbot3Strip);
-	pbot.drawPicture(pic, pbot.pbotHW.pbot4Strip);
-	pbot.pbotHW.pbot1Strip.show();
-	pbot.pbotHW.pbot2Strip.show();
-	pbot.pbotHW.pbot3Strip.show();
-	pbot.pbotHW.pbot4Strip.show();
+	pbot.drawPicture(pic, 1);
+	pbot.drawPicture(pic, 2);
+	pbot.drawPicture(pic, 3);
+	pbot.drawPicture(pic, 4);
+	pbot.show(1);
+	pbot.show(2);
+	pbot.show(3);
+	pbot.show(4);
 
 	//BBs
 	fbot.throwbbs();
@@ -251,14 +142,14 @@ client.on("giftpaidupgrade", (channel, username, sender, userstate) => {
 	pbot.clearPanel(2);
 	pbot.clearPanel(3);
 	pbot.clearPanel(4);
-	pbot.drawPicture(pic, pbot.pbotHW.pbot1Strip);
-	pbot.drawPicture(pic, pbot.pbotHW.pbot2Strip);
-	pbot.drawPicture(pic, pbot.pbotHW.pbot3Strip);
-	pbot.drawPicture(pic, pbot.pbotHW.pbot4Strip);
-	pbot.pbotHW.pbot1Strip.show();
-	pbot.pbotHW.pbot2Strip.show();
-	pbot.pbotHW.pbot3Strip.show();
-	pbot.pbotHW.pbot4Strip.show();
+	pbot.drawPicture(pic, 1);
+	pbot.drawPicture(pic, 2);
+	pbot.drawPicture(pic, 3);
+	pbot.drawPicture(pic, 4);
+	pbot.show(1);
+	pbot.show(2);
+	pbot.show(3);
+	pbot.show(4);
 
 	//BBs
 	fbot.throwbbs();
@@ -275,14 +166,14 @@ client.on("anongiftpaidupgrade", (channel, username, userstate) => {
 	pbot.clearPanel(2);
 	pbot.clearPanel(3);
 	pbot.clearPanel(4);
-	pbot.drawPicture(pic, pbot.pbotHW.pbot1Strip);
-	pbot.drawPicture(pic, pbot.pbotHW.pbot2Strip);
-	pbot.drawPicture(pic, pbot.pbotHW.pbot3Strip);
-	pbot.drawPicture(pic, pbot.pbotHW.pbot4Strip);
-	pbot.pbotHW.pbot1Strip.show();
-	pbot.pbotHW.pbot2Strip.show();
-	pbot.pbotHW.pbot3Strip.show();
-	pbot.pbotHW.pbot4Strip.show();
+	pbot.drawPicture(pic, 1);
+	pbot.drawPicture(pic, 2);
+	pbot.drawPicture(pic, 3);
+	pbot.drawPicture(pic, 4);
+	pbot.show(1);
+	pbot.show(2);
+	pbot.show(3);
+	pbot.show(4);
 
 	//BBs
 	fbot.throwbbs();
@@ -431,10 +322,13 @@ function processCommand(user, message) {
 	} else if (commands[0] === "!fb1") {
 		var commStr = commands.slice(1).join(".");//TEMP: Later, change "commands = message.split(".",1)" for bot
 		fbot.addToQue(client, user, commStr);
-	}else if (commands[0] === "!xb1") {
+	}else if (commands[0].startsWith("!xb1")) {
+		var commStr = commands.slice().join(".");//TEMP: Later, change "commands = message.split(".",1)" for bot
+		xbot.processCommands(commStr);
+	}/*else if (commands[0] === "!xb1") {
 		var commStr = commands.slice(1).join(".");//TEMP: Later, change "commands = message.split(".",1)" for bot
 		xbot.processCommands(commStr);
-	}else if (commands[0] === "!pb1") {
+	}*/else if (commands[0] === "!pb1") {
 		var pixArr = [];
 		var clrArr = [];
 
@@ -451,7 +345,7 @@ function processCommand(user, message) {
 				pbot.setPix(pbot.pbotHW.pbot1Strip.pixel(pixArr[j] - 1), clrArr[j]);
 			}
 		}
-		pbot.pbotHW.pbot1Strip.show();
+		pbot.show(1);
 	} else if (commands[0] === "!pb1r") {
 		for (var i = 1; i < commands.length; i++) {
 			command = commands[i].split(/[a-z]+/);
@@ -460,7 +354,7 @@ function processCommand(user, message) {
 			pixelColor = command[0];
 			pbot.setRow(row, pixelColor, pbot.pbotHW.pbot1Strip);
 		}
-		pbot.pbotHW.pbot1Strip.show();
+		pbot.show(1);
 	} else if (commands[0] === "!pb1c") {
 		for (var i = 1; i < commands.length; i++) {
 			command = commands[i].split(/[a-z]+/);
@@ -469,10 +363,10 @@ function processCommand(user, message) {
 			pixelColor = command[0];
 			pbot.setCol(col, pixelColor, pbot.pbotHW.pbot1Strip);
 		}
-		pbot.pbotHW.pbot1Strip.show();
+		pbot.show(1);
 	} else if (commands[0] === "!pb1x") {
 		pbot.clearPanel(1);
-		setTimeout(function () { pbot.pbotHW.pbot1Strip.show(); }, 500);
+		setTimeout(function () { pbot.show(1); }, 500);
 		//strip.show();
 	} else if (commands[0] === "!pb1n") { //Random pixel draw, !pb1n.[color][number of pix]
 		var numOfPix;
@@ -490,19 +384,19 @@ function processCommand(user, message) {
 			for (var j = 1; j <= numOfPix; j++) {
 				var curPix = Math.floor(Math.random() * 144);// 0-143
 				var curColor = colorOfPix;
-				animatePix(curPix, curColor, time += 300);//delay between pixel draws.
+				pbot.animatePix(curPix, curColor, time += 300);
 			}
 		}
 	} else if (commands[0] === "!pb1p") { //Set panel color, !pb1p.m
 		var panelColor = commands[1];
 		pbot.clearPanel(1);
-		setTimeout(function () { pbot.pbotHW.pbot1Strip.color(pbot.getHexColor(panelColor)); pbot.pbotHW.pbot1Strip.show(); }, 500);
+		setTimeout(function () { pbot.pbotHW.pbot1Strip.color(pbot.getHexColor(panelColor)); pbot.show(1); }, 500);
 	} else if (commands[0] === "!pb1d") { //Draw a picture
 		var colors = commands[1];//RLE encoding representing picture
 
 		if (pbot.isValidDrawMap(colors) != false) {
 			pbot.clearPanel(1);
-			setTimeout(function () { pbot.drawPicture(colors, pbot.pbotHW.pbot1Strip); pbot.pbotHW.pbot1Strip.show(); }, 500);
+			setTimeout(function () { pbot.drawPicture(colors, 1); pbot.show(1); }, 500);
 		} else {
 			client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
 		}
@@ -563,7 +457,7 @@ function processCommand(user, message) {
 
 		if (pbot.isValidDrawMap(colors) != false) {
 			pbot.clearPanel(2);
-			setTimeout(function () { pbot.drawPicture(colors, pbot.pbotHW.pbot2Strip); pbot.pbotHW.pbot2Strip.show(); }, 500);
+			setTimeout(function () { pbot.drawPicture(colors, 2); pbot.show(2); }, 500);
 		} else {
 			client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
 		}
@@ -600,18 +494,18 @@ function processCommand(user, message) {
 		}
 	} else if (commands[0] === "!pb2x") {
 		pbot.clearPanel(2);
-		setTimeout(function () { pbot.pbotHW.pbot2Strip.show(); }, 500);
+		setTimeout(function () { pbot.show(2); }, 500);
 		//strip.show();
 	} else if (commands[0] === "!pb2p") { //Set panel color, !pb1p.m
 		var panelColor = commands[1];
 		pbot.clearPanel(2);
-		setTimeout(function () { pbot.pbotHW.pbot2Strip.color(pbot.getHexColor(panelColor)); pbot.pbotHW.pbot2Strip.show(); }, 500);
+		setTimeout(function () { pbot.pbotHW.pbot2Strip.color(pbot.getHexColor(panelColor)); pbot.show(2); }, 500);
 	} else if (commands[0] === "!pb3d") { //PIXELBOT 2
 		var colors = commands[1];//RLE encoding representing picture
 
 		if (pbot.isValidDrawMap(colors) != false) {
 			pbot.clearPanel(3);
-			setTimeout(function () { pbot.drawPicture(colors, pbot.pbotHW.pbot3Strip); pbot.pbotHW.pbot3Strip.show(); }, 500);
+			setTimeout(function () { pbot.drawPicture(colors, 3); pbot.show(3); }, 500);
 		} else {
 			client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
 		}
@@ -648,18 +542,18 @@ function processCommand(user, message) {
 		}
 	} else if (commands[0] === "!pb3x") {
 		pbot.clearPanel(3);
-		setTimeout(function () { pbot.pbotHW.pbot3Strip.show(); }, 500);
+		setTimeout(function () { pbot.show(3); }, 500);
 		//strip.show();
 	} else if (commands[0] === "!pb3p") { //Set panel color, !pb1p.m
 		var panelColor = commands[1];
 		pbot.clearPanel(3);
-		setTimeout(function () { pbot.pbotHW.pbot3Strip.color(pbot.getHexColor(panelColor)); pbot.pbotHW.pbot3Strip.show(); }, 500);
+		setTimeout(function () { pbot.pbotHW.pbot3Strip.color(pbot.getHexColor(panelColor)); pbot.show(3); }, 500);
 	} else if (commands[0] === "!pb4d") { //PIXELBOT 2
 		var colors = commands[1];//RLE encoding representing picture
 
 		if (pbot.isValidDrawMap(colors) != false) {
 			pbot.clearPanel(4);
-			setTimeout(function () { pbot.drawPicture(colors, pbot.pbotHW.pbot4Strip); pbot.pbotHW.pbot4Strip.show(); }, 500);
+			setTimeout(function () { pbot.drawPicture(colors, 4); pbot.show(4); }, 500);
 		} else {
 			client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
 		}
@@ -696,12 +590,12 @@ function processCommand(user, message) {
 		}
 	} else if (commands[0] === "!pb4x") {
 		pbot.clearPanel(4);
-		setTimeout(function () { pbot.pbotHW.pbot4Strip.show(); }, 500);
+		setTimeout(function () { pbot.show(4); }, 500);
 		//strip.show();
 	} else if (commands[0] === "!pb4p") { //Set panel color, !pb1p.m
 		var panelColor = commands[1];
 		pbot.clearPanel(4);
-		setTimeout(function () { pbot.pbotHW.pbot4Strip.color(pbot.getHexColor(panelColor)); pbot.pbotHW.pbot4Strip.show(); }, 500);
+		setTimeout(function () { pbot.pbotHW.pbot4Strip.color(pbot.getHexColor(panelColor)); pbot.show(4); }, 500);
 	} else if (commands[0] === "!pbd") { //!pbd.pb1.pb2.pb3.pb4, !pbd.pb1..pb3
 		var bDrawPB1 = false;
 		var bDrawPB2 = false;
@@ -744,26 +638,26 @@ function processCommand(user, message) {
 		pbot.clearAllPanels();
 		if (bDrawPB1) {
 			pbot.clearPanel(1);
-			setTimeout(function () { pbot.drawPicture(commands[1], pbot.pbotHW.pbot1Strip); pbot.pbotHW.pbot1Strip.show(); }, 500);
+			setTimeout(function () { pbot.drawPicture(commands[1], 1); pbot.show(1); }, 500);
 		}
 		if (bDrawPB2) {
 			pbot.clearPanel(2);
-			setTimeout(function () { pbot.drawPicture(commands[2], pbot.pbotHW.pbot2Strip); pbot.pbotHW.pbot2Strip.show(); }, 500);
+			setTimeout(function () { pbot.drawPicture(commands[2], 2); pbot.show(2); }, 500);
 		}
 		if (bDrawPB3) {
 			pbot.clearPanel(3);
-			setTimeout(function () { pbot.drawPicture(commands[3], pbot.pbotHW.pbot3Strip); pbot.pbotHW.pbot3Strip.show(); }, 500);
+			setTimeout(function () { pbot.drawPicture(commands[3], 3); pbot.show(3); }, 500);
 		}
 		if (bDrawPB4) {
 			pbot.clearPanel(4);
-			setTimeout(function () { pbot.drawPicture(commands[4], pbot.pbotHW.pbot4Strip); pbot.pbotHW.pbot4Strip.show(); }, 500);
+			setTimeout(function () { pbot.drawPicture(commands[4], 4); pbot.show(4); }, 500);
 		}
 	} else if (commands[0] === "!pbx") {
 		pbot.clearAllPanels();
-		setTimeout(function () { pbot.pbotHW.pbot1Strip.show(); }, 500);
-		setTimeout(function () { pbot.pbotHW.pbot2Strip.show(); }, 500);
-		setTimeout(function () { pbot.pbotHW.pbot3Strip.show(); }, 500);
-		setTimeout(function () { pbot.pbotHW.pbot4Strip.show(); }, 500);
+		setTimeout(function () { pbot.show(1); }, 500);
+		setTimeout(function () { pbot.show(2); }, 500);
+		setTimeout(function () { pbot.show(3); }, 500);
+		setTimeout(function () { pbot.show(4); }, 500);
 	} else if (commands[0] === "!pba") {
 		var pic = "";
 		var time = 500;//Default
@@ -1067,16 +961,16 @@ function processCommand(user, message) {
 
 				switch (curPanel) {
 					case 0://PB1
-						animateAllPanelPix(curPix, curColor, time += 200, pbot.pbotHW.pbot1Strip);
+						pbot.animateAllPanelPix(curPix, curColor, time += 200, pbot.pbotHW.pbot1Strip);
 						break;
 					case 1://PB2
-						animateAllPanelPix(curPix, curColor, time += 200, pbot.pbotHW.pbot2Strip);
+						pbot.animateAllPanelPix(curPix, curColor, time += 200, pbot.pbotHW.pbot2Strip);
 						break;
 					case 2://PB3
-						animateAllPanelPix(curPix, curColor, time += 200, pbot.pbotHW.pbot3Strip);
+						pbot.animateAllPanelPix(curPix, curColor, time += 200, pbot.pbotHW.pbot3Strip);
 						break;
 					case 3://PB4
-						animateAllPanelPix(curPix, curColor, time += 200, pbot.pbotHW.pbot4Strip);
+						pbot.animateAllPanelPix(curPix, curColor, time += 200, pbot.pbotHW.pbot4Strip);
 						break;
 
 				}
@@ -1093,7 +987,7 @@ function processCommand(user, message) {
 			console.log("str: " + strs[0]);
 			console.log("credit:" + strs[1]);
 			pbot.clearPanel(1);
-			setTimeout(function () { pbot.drawPicture(strs[0], pbot.pbotHW.pbot1Strip); pbot.pbotHW.pbot1Strip.show(); }, 500);
+			setTimeout(function () { pbot.drawPicture(strs[0], 1); pbot.show(1); }, 500);
 			client.action("laboratory424", "  CREDIT: " + fileName + " on PixelBot1 is by " + strs[1]);
 		} else {
 			client.action("laboratory424", user['display-name'] + ", Sorry, there isn't a saved drawing with that name.");
@@ -1108,7 +1002,7 @@ function processCommand(user, message) {
 			console.log("str: " + strs[0]);
 			console.log("credit:" + strs[1]);
 			pbot.clearPanel(2);
-			setTimeout(function () { pbot.drawPicture(strs[0], pbot.pbotHW.pbot2Strip); pbot.pbotHW.pbot2Strip.show(); }, 500);
+			setTimeout(function () { pbot.drawPicture(strs[0], 2); pbot.show(2); }, 500);
 			client.action("laboratory424", "  CREDIT: " + fileName + " on PixelBot2 is by " + strs[1]);
 		} else {
 			client.action("laboratory424", user['display-name'] + ", Sorry, there isn't a saved drawing with that name.");
@@ -1123,7 +1017,7 @@ function processCommand(user, message) {
 			console.log("str: " + strs[0]);
 			console.log("credit:" + strs[1]);
 			pbot.clearPanel(3);
-			setTimeout(function () { pbot.drawPicture(strs[0], pbot.pbotHW.pbot3Strip); pbot.pbotHW.pbot3Strip.show(); }, 500);
+			setTimeout(function () { pbot.drawPicture(strs[0], 3); pbot.show(3); }, 500);
 			client.action("laboratory424", "  CREDIT: " + fileName + " on PixelBot3 is by " + strs[1]);
 		} else {
 			client.action("laboratory424", user['display-name'] + ", Sorry, there isn't a saved drawing with that name.");
@@ -1138,7 +1032,7 @@ function processCommand(user, message) {
 			console.log("str: " + strs[0]);
 			console.log("credit:" + strs[1]);
 			pbot.clearPanel(4);
-			setTimeout(function () { pbot.drawPicture(strs[0], pbot.pbotHW.pbot4Strip); pbot.pbotHW.pbot4Strip.show(); }, 500);
+			setTimeout(function () { pbot.drawPicture(strs[0], 4); pbot.show(4); }, 500);
 			client.action("laboratory424", "  CREDIT: " + fileName + " on PixelBot4 is by " + strs[1]);
 		} else {
 			client.action("laboratory424", user['display-name'] + ", Sorry, there isn't a saved drawing with that name.");
@@ -1163,22 +1057,6 @@ like gPBOT1IntervalPtr and gPBOT1PicArray as well as other exported
 supporting functions.
 */
 
-/////////////////////////////////////////////////
-//These animatePix calls are used only for random pix generation.
-function animatePix(pix, color, time) {
-	setTimeout(function () {
-		pbot.setPix(pbot.pbotHW.pbot1Strip.pixel(pix), color);
-		pbot.pbotHW.pbot1Strip.show();
-	}, time);
-}
-
-function animateAllPanelPix(pix, color, time, strip) {
-	setTimeout(function () {
-		pbot.setPix(strip.pixel(pix), color);
-		strip.show();
-	}, time);
-}
-
 /////////////////////////////////////////////////////////
 //loopFrames()
 //	Takes an array of RLE picture commands and displayes them based on time. Loops forever.
@@ -1188,9 +1066,9 @@ function loopFramesPB1(time) {
 	var i = 0;
 	pbot.gPBOT1IntervalPtr = setInterval(function () {
 		if (i == pbot.gPBOT1PicArray.length) {i = 0;}
-		pbot.drawPicture(pbot.gPBOT1PicArray[i], pbot.pbotHW.pbot1Strip);
+		pbot.drawPicture(pbot.gPBOT1PicArray[i], 1);
 		i++;
-		pbot.pbotHW.pbot1Strip.show();
+		pbot.show(1);
 	}, time);
 }
 
@@ -1198,9 +1076,9 @@ function loopFramesPB2(time) {
 	var i = 0;
 	pbot.gPBOT2IntervalPtr = setInterval(function () {
 		if (i == pbot.gPBOT2PicArray.length) {i = 0;}
-		pbot.drawPicture(pbot.gPBOT2PicArray[i], pbot.pbotHW.pbot2Strip);
+		pbot.drawPicture(pbot.gPBOT2PicArray[i], 2);
 		i++;
-		pbot.pbotHW.pbot2Strip.show();
+		pbot.show(2);
 	}, time);
 }
 
@@ -1208,9 +1086,9 @@ function loopFramesPB3(time) {
 	var i = 0;
 	pbot.gPBOT3IntervalPtr = setInterval(function () {
 		if (i == pbot.gPBOT3PicArray.length) {i = 0;}
-		pbot.drawPicture(pbot.gPBOT3PicArray[i], pbot.pbotHW.pbot3Strip);
+		pbot.drawPicture(pbot.gPBOT3PicArray[i], 3);
 		i++;
-		pbot.pbotHW.pbot3Strip.show();
+		pbot.show(3);
 	}, time);
 }
 
@@ -1218,9 +1096,9 @@ function loopFramesPB4(time) {
 	var i = 0;
 	pbot.gPBOT4IntervalPtr = setInterval(function () {
 		if (i == pbot.gPBOT4PicArray.length) {i = 0;}
-		pbot.drawPicture(pbot.gPBOT4PicArray[i], pbot.pbotHW.pbot4Strip);
+		pbot.drawPicture(pbot.gPBOT4PicArray[i], 4);
 		i++;
-		pbot.pbotHW.pbot4Strip.show();
+		pbot.show(4);
 	}, time);
 }
 
@@ -1231,14 +1109,14 @@ function loopAllFrames(time) {
 		if (i == pbot.gPBOT4PicArray.length) {
 			i = 0;
 		}
-		pbot.drawPicture(pbot.gPBOT1PicArray[i], pbot.pbotHW.pbot1Strip);
-		pbot.drawPicture(pbot.gPBOT2PicArray[i], pbot.pbotHW.pbot2Strip);
-		pbot.drawPicture(pbot.gPBOT3PicArray[i], pbot.pbotHW.pbot3Strip);
-		pbot.drawPicture(pbot.gPBOT4PicArray[i], pbot.pbotHW.pbot4Strip);
+		pbot.drawPicture(pbot.gPBOT1PicArray[i], 1);
+		pbot.drawPicture(pbot.gPBOT2PicArray[i], 2);
+		pbot.drawPicture(pbot.gPBOT3PicArray[i], 3);
+		pbot.drawPicture(pbot.gPBOT4PicArray[i], 4);
 		i++;
-		pbot.pbotHW.pbot1Strip.show();
-		pbot.pbotHW.pbot2Strip.show();
-		pbot.pbotHW.pbot3Strip.show();
-		pbot.pbotHW.pbot4Strip.show();
+		pbot.show(1);
+		pbot.show(2);
+		pbot.show(3);
+		pbot.show(4);
 	}, time);
 }
