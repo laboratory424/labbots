@@ -230,6 +230,10 @@ function processCommands(commStr){
       clearInterval(gRadarIntervalPtr);
       init();
       break;
+    case "!zddt"://Experimental ZepDek Disco Tech
+      //if(commands[1] == "on"){lights.on();}
+      //if(commands[1] == "off"){lights.off();}
+      break;
   }
 }
 //////////////////////////////////////////

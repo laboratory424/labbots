@@ -294,438 +294,276 @@ function processUser(user, message) {
 
 //////////////////////////////////////////
 //Main Bot Control Commands
-//This needs to be converted to a case statement once pbot.processCommands()
-//is implemented. like this:
-/*switch(commands[0]){
-	case "!eb1":
-		ebot.processCommands();
-	case "!fb1":
-		fbot.addToQue();
-	case "!pb1":
-	case "!pb1r":
-	so on..
-		pbot.processCommands();
-}*/
 function processCommand(user, message) {
 	var bProcessed = false;
-	var command;
 	var i;
 	var time = 1000;
+	//TEMP: After pbot migration, change "commands = message.split(".",1)" for bo
 	var commands = message.split(".", 145);
-	var pixelColor;
+	var commStr = commands.slice().join(".");
 
-	//TBD: Convert to switch.	
-	if (commands[0] === "!eb1") {
-		var commStr = commands.slice(1).join(".");//TEMP: Later, change "commands = message.split(".",1)" for bot
-		ebot.processCommands(client, user, commStr);
-	} else if (commands[0] === "!eb1a") {
-		client.action("laboratory424", user['display-name'] + ", !eb1a no longer supported. Use !eb1 instead.");
-	} else if (commands[0] === "!fb1") {
-		var commStr = commands.slice(1).join(".");//TEMP: Later, change "commands = message.split(".",1)" for bot
-		fbot.addToQue(client, user, commStr);
-	}else if (commands[0].startsWith("!xb1")) {
-		var commStr = commands.slice().join(".");//TEMP: Later, change "commands = message.split(".",1)" for bot
-		xbot.processCommands(commStr);
-	}/*else if (commands[0] === "!xb1") {
-		var commStr = commands.slice(1).join(".");//TEMP: Later, change "commands = message.split(".",1)" for bot
-		xbot.processCommands(commStr);
-	}*/else if (commands[0] === "!pb1") {
-		var pixArr = [];
-		var clrArr = [];
+	switch(commands[0]){
+		case "!eb1":	
+			commStr = commands.slice(1).join(".");//Temp, fix in ebot.js
+			ebot.processCommands(client, user, commStr);
+			break;
+		case "!eb1a":
+			client.action("laboratory424", user['display-name'] + ", !eb1a no longer supported. Use !eb1 instead.");
+			break;
+		case "!fb1":
+			commStr = commands.slice(1).join(".");//temp, fix in fbot.js
+			fbot.addToQue(client, user, commStr);
+			break;
+		case "!xb1":
+		case "!xb1r":
+		case "!xb1d":
+		case "!xb1a":
+		case "!xb1p":
+		case "!xb1i":
+		case "!xb1x":
+			xbot.processCommands(commStr);
+			break;
+		case "!pb1":
+		case "!pb1r":
+		case "!pb1c":
+		case "!pb1n"://Random pixel draw, !pb1n.[color][number of pix]
+		case "!pbn":
+		case "!pb1p"://Set panel color, !pb1p.m
+		case "!pb1p":
+		case "!pb2p":
+		case "!pb3p":
+		case "!pb4p":
+		case "!pb1d"://Draw a picture
+		case "!pb2d":
+		case "!pb3d":
+		case "!pb4d":
+		case "!pbd":
+			pbot.processCommands(client, user, commStr);
+			break;
+		case "!pbdz"://TBD: should be able to move to pbot.js
+			if (commands[1] != null) {
 
-		//Load Array data
-		for (var i = 1; i < commands.length; i++) {
-			command = commands[i].split(/[a-z]+/);
-			pixArr.push(command[1]);//add pixel
-			command = commands[i].split(/[0-9]+/);
-			clrArr.push(command[0]);//add color
-		}
-		//Set Pixels
-		for (var j = 0; j < pixArr.length; j++) {
-			if (!isNaN(pixArr[j]) && pixArr[j] >= 1 && pixArr[j] <= 144) {
-				pbot.setPix(pbot.pbotHW.pbot1Strip.pixel(pixArr[j] - 1), clrArr[j]);
+				var buffer = new Buffer(commands[1], 'base64');
+				zlib.unzip(buffer, function (err, buffer) {
+					if (!err) {
+						var drawCommand = "!pbd." + buffer.toString();//Decoded & decompressed
+						processCommand(user, drawCommand);
+					}
+					else {
+						console.log("ERROR UNCOMPRESSING!");
+					}
+				});
 			}
-		}
-		pbot.show(1);
-	} else if (commands[0] === "!pb1r") {
-		for (var i = 1; i < commands.length; i++) {
-			command = commands[i].split(/[a-z]+/);
-			var row = command[1];
-			command = commands[i].split(/[0-9]+/);
-			pixelColor = command[0];
-			pbot.setRow(row, pixelColor, pbot.pbotHW.pbot1Strip);
-		}
-		pbot.show(1);
-	} else if (commands[0] === "!pb1c") {
-		for (var i = 1; i < commands.length; i++) {
-			command = commands[i].split(/[a-z]+/);
-			var col = command[1];
-			command = commands[i].split(/[0-9]+/);
-			pixelColor = command[0];
-			pbot.setCol(col, pixelColor, pbot.pbotHW.pbot1Strip);
-		}
-		pbot.show(1);
-	} else if (commands[0] === "!pb1x") {
-		pbot.clearPanel(1);
-		setTimeout(function () { pbot.show(1); }, 500);
-		//strip.show();
-	} else if (commands[0] === "!pb1n") { //Random pixel draw, !pb1n.[color][number of pix]
-		var numOfPix;
-		var colorOfPix;
-		var time = 0;
-
-		command = commands[1].split(/[a-z]+/);
-		numOfPix = command[1];//num of pixels to select
-		command = commands[1].split(/[0-9]+/);
-		colorOfPix = command[0];//add color
-
-		if (!isNaN(numOfPix) && numOfPix >= 1 && numOfPix <= 144) {
+			break;
+		//We need to keep clear frames here until we move animation to pbot.js
+		//When moved, there is a disconnect with the intervals for some reason.
+		case "!pb1x": 
 			pbot.clearPanel(1);
-			//Set Pixels
-			for (var j = 1; j <= numOfPix; j++) {
-				var curPix = Math.floor(Math.random() * 144);// 0-143
-				var curColor = colorOfPix;
-				pbot.animatePix(curPix, curColor, time += 300);
-			}
-		}
-	} else if (commands[0] === "!pb1p") { //Set panel color, !pb1p.m
-		var panelColor = commands[1];
-		pbot.clearPanel(1);
-		setTimeout(function () { pbot.pbotHW.pbot1Strip.color(pbot.getHexColor(panelColor)); pbot.show(1); }, 500);
-	} else if (commands[0] === "!pb1d") { //Draw a picture
-		var colors = commands[1];//RLE encoding representing picture
-
-		if (pbot.isValidDrawMap(colors) != false) {
-			pbot.clearPanel(1);
-			setTimeout(function () { pbot.drawPicture(colors, 1); pbot.show(1); }, 500);
-		} else {
-			client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
-		}
-	} else if (commands[0] === "!pb1a") { //Draw animated picture from editor
-		var pic = "";
-		var time = 500;//Default
-		var i;
-		var bGoodDrawing = true;
-
-		//Let check all the data sent before we update display
-		for (i = 1; i < commands.length; i++) {
-			if (isNaN(commands[i])) {	//If time entered, skip validation.
-				if (pbot.isValidDrawMap(commands[i]) == false) {
-					bGoodDrawing = false;
-					break;
-				}
-			}
-		}
-
-		if (bGoodDrawing == true) {
-			pbot.clearPanel(1);
-			for (i = 1; i < commands.length; i++) {
-				if (!isNaN(commands[i])) { //Did they submit a time?
-					time = commands[i];
-					if (time < 300) { time = 300; }//Until we resolve time-collision issue, force a min of 300ms.
-				} else {
-					pic = commands[i];
-					pbot.gPBOT1PicArray.push(pic);
-				}
-			}
-			loopFramesPB1(time);//Loop forever.
-		} else {
-			client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
-		}
-	} else if (commands[0] === "!pb1st") { //Scroll Text
-		/*var str = commands[1];//str to draw
-		var time = 300;
-		var curCol = 11;
-		var pic;
-		var curChar;
-		var charIndex;
-		var picFrames = 5 * str.length+8;//8 is temp until we get this working. Just to push it off the screen
-					var approvedChars = new RegExp("^[0-9A-Za-z ]+$");
-
-					if(approvedChars.test(str)){
-				 clearPanel(1);
-				 for(var i = 0; i < picFrames; i++){
-							pic = pbot.generateFrame(str,i);//i represents index into str col data
-							pbot.gPBOT1PicArray.push(pic);
-				 }
-				 loopFrames(pbot.gPBOT1PicArray,time);
-				 }else{
-			 client.action("laboratory424",user['display-name'] + ", Sorry, Bad character in text.");
-		 }*/
-		client.action("laboratory424", user['display-name'] + ", Sorry, scroll feature disabled for now.");
-	} else if (commands[0] === "!pb2d") { //PIXELBOT 2
-		var colors = commands[1];//RLE encoding representing picture
-
-		if (pbot.isValidDrawMap(colors) != false) {
+			setTimeout(function () { pbot.show(1); }, 500);
+			break;
+		case "!pb2x":
 			pbot.clearPanel(2);
-			setTimeout(function () { pbot.drawPicture(colors, 2); pbot.show(2); }, 500);
-		} else {
-			client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
-		}
-	} else if (commands[0] === "!pb2a") {
-		var pic = "";
-		var time = 500;//Default
-		var i;
-		var bGoodDrawing = true;
-
-		//Let check all the data sent before we update display
-		for (i = 1; i < commands.length; i++) {
-			if (isNaN(commands[i])) {	//If time entered, skip validation.
-				if (pbot.isValidDrawMap(commands[i]) == false) {
-					bGoodDrawing = false;
-					break;
-				}
-			}
-		}
-
-		if (bGoodDrawing == true) {
-			pbot.clearPanel(2);
-			for (i = 1; i < commands.length; i++) {
-				if (!isNaN(commands[i])) { //Did they submit a time?
-					time = commands[i];
-					if (time < 300) { time = 300; }//Until we resolve time-collision issue, force a min of 300ms.
-				} else {
-					pic = commands[i];
-					pbot.gPBOT2PicArray.push(pic);
-				}
-			}
-			loopFramesPB2(time);//Loop forever.
-		} else {
-			client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
-		}
-	} else if (commands[0] === "!pb2x") {
-		pbot.clearPanel(2);
-		setTimeout(function () { pbot.show(2); }, 500);
-		//strip.show();
-	} else if (commands[0] === "!pb2p") { //Set panel color, !pb1p.m
-		var panelColor = commands[1];
-		pbot.clearPanel(2);
-		setTimeout(function () { pbot.pbotHW.pbot2Strip.color(pbot.getHexColor(panelColor)); pbot.show(2); }, 500);
-	} else if (commands[0] === "!pb3d") { //PIXELBOT 2
-		var colors = commands[1];//RLE encoding representing picture
-
-		if (pbot.isValidDrawMap(colors) != false) {
+			setTimeout(function () { pbot.show(2); }, 500);
+			break;
+		case "!pb3x":
 			pbot.clearPanel(3);
-			setTimeout(function () { pbot.drawPicture(colors, 3); pbot.show(3); }, 500);
-		} else {
-			client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
-		}
-	} else if (commands[0] === "!pb3a") {
-		var pic = "";
-		var time = 500;//Default
-		var i;
-		var bGoodDrawing = true;
-
-		//Let check all the data sent before we update display
-		for (i = 1; i < commands.length; i++) {
-			if (isNaN(commands[i])) {	//If time entered, skip validation.
-				if (pbot.isValidDrawMap(commands[i]) == false) {
-					bGoodDrawing = false;
-					break;
-				}
-			}
-		}
-
-		if (bGoodDrawing == true) {
-			pbot.clearPanel(3);
-			for (i = 1; i < commands.length; i++) {
-				if (!isNaN(commands[i])) { //Did they submit a time?
-					time = commands[i];
-					if (time < 300) { time = 300; }//Until we resolve time-collision issue, force a min of 300ms.
-				} else {
-					pic = commands[i];
-					pbot.gPBOT3PicArray.push(pic);
-				}
-			}
-			loopFramesPB3(time);//Loop forever.
-		} else {
-			client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
-		}
-	} else if (commands[0] === "!pb3x") {
-		pbot.clearPanel(3);
-		setTimeout(function () { pbot.show(3); }, 500);
-		//strip.show();
-	} else if (commands[0] === "!pb3p") { //Set panel color, !pb1p.m
-		var panelColor = commands[1];
-		pbot.clearPanel(3);
-		setTimeout(function () { pbot.pbotHW.pbot3Strip.color(pbot.getHexColor(panelColor)); pbot.show(3); }, 500);
-	} else if (commands[0] === "!pb4d") { //PIXELBOT 2
-		var colors = commands[1];//RLE encoding representing picture
-
-		if (pbot.isValidDrawMap(colors) != false) {
+			setTimeout(function () { pbot.show(3); }, 500);
+			break;
+		case "!pb4x":
 			pbot.clearPanel(4);
-			setTimeout(function () { pbot.drawPicture(colors, 4); pbot.show(4); }, 500);
-		} else {
-			client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
-		}
-	} else if (commands[0] === "!pb4a") {
-		var pic = "";
-		var time = 500;//Default
-		var i;
-		var bGoodDrawing = true;
-
-		//Let check all the data sent before we update display
-		for (i = 1; i < commands.length; i++) {
-			if (isNaN(commands[i])) {	//If time entered, skip validation.
-				if (pbot.isValidDrawMap(commands[i]) == false) {
-					bGoodDrawing = false;
-					break;
-				}
-			}
-		}
-
-		if (bGoodDrawing == true) {
-			pbot.clearPanel(4);
-			for (i = 1; i < commands.length; i++) {
-				if (!isNaN(commands[i])) { //Did they submit a time?
-					time = commands[i];
-					if (time < 300) { time = 300; }//Until we resolve time-collision issue, force a min of 300ms.
-				} else {
-					pic = commands[i];
-					pbot.gPBOT4PicArray.push(pic);
-				}
-			}
-			loopFramesPB4(time);//Loop forever.
-		} else {
-			client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
-		}
-	} else if (commands[0] === "!pb4x") {
-		pbot.clearPanel(4);
-		setTimeout(function () { pbot.show(4); }, 500);
-		//strip.show();
-	} else if (commands[0] === "!pb4p") { //Set panel color, !pb1p.m
-		var panelColor = commands[1];
-		pbot.clearPanel(4);
-		setTimeout(function () { pbot.pbotHW.pbot4Strip.color(pbot.getHexColor(panelColor)); pbot.show(4); }, 500);
-	} else if (commands[0] === "!pbd") { //!pbd.pb1.pb2.pb3.pb4, !pbd.pb1..pb3
-		var bDrawPB1 = false;
-		var bDrawPB2 = false;
-		var bDrawPB3 = false;
-		var bDrawPB4 = false;
-
-		var commLen = commands.length;
-		//PB1
-		if (commLen - 1 >= 1 && commands[1] !== '') {
-			if (pbot.isValidDrawMap(commands[1]) == false) {
-				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT1 cannot draw this. Bad syntax in drawing.");
-			} else {
-				bDrawPB1 = true;
-			}
-		}
-		//PB2
-		if (commLen - 1 >= 2 && commands[2] !== '') {
-			if (pbot.isValidDrawMap(commands[2]) == false) {
-				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT2 cannot draw this. Bad syntax in drawing.");
-			} else {
-				bDrawPB2 = true;
-			}
-		}
-		//PB3
-		if (commLen - 1 >= 3 && commands[3] !== '') {
-			if (pbot.isValidDrawMap(commands[3]) == false) {
-				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT3 cannot draw this. Bad syntax in drawing.");
-			} else {
-				bDrawPB3 = true;
-			}
-		}
-		//PB4
-		if (commLen - 1 >= 4 && commands[4] !== '') {
-			if (pbot.isValidDrawMap(commands[4]) == false) {
-				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT4 cannot draw this. Bad syntax in drawing.");
-			} else {
-				bDrawPB4 = true;
-			}
-		}
-		pbot.clearAllPanels();
-		if (bDrawPB1) {
-			pbot.clearPanel(1);
-			setTimeout(function () { pbot.drawPicture(commands[1], 1); pbot.show(1); }, 500);
-		}
-		if (bDrawPB2) {
-			pbot.clearPanel(2);
-			setTimeout(function () { pbot.drawPicture(commands[2], 2); pbot.show(2); }, 500);
-		}
-		if (bDrawPB3) {
-			pbot.clearPanel(3);
-			setTimeout(function () { pbot.drawPicture(commands[3], 3); pbot.show(3); }, 500);
-		}
-		if (bDrawPB4) {
-			pbot.clearPanel(4);
-			setTimeout(function () { pbot.drawPicture(commands[4], 4); pbot.show(4); }, 500);
-		}
-	} else if (commands[0] === "!pbx") {
-		pbot.clearAllPanels();
-		setTimeout(function () { pbot.show(1); }, 500);
-		setTimeout(function () { pbot.show(2); }, 500);
-		setTimeout(function () { pbot.show(3); }, 500);
-		setTimeout(function () { pbot.show(4); }, 500);
-	} else if (commands[0] === "!pba") {
-		var pic = "";
-		var time = 500;//Default
-		var i;
-		var panels;
-		var bGoodDrawing = true;
-
-		//Let check all the data sent before we update display
-		for (i = 1; i < commands.length; i++) {
-			if (isNaN(commands[i])) {	//If time entered, skip validation.
-				if (pbot.isValidDrawMap(commands[i]) == false) {
-					bGoodDrawing = false;
-					break;
-				}
-			}
-		}
-
-		if (bGoodDrawing == true) {
+			setTimeout(function () { pbot.show(4); }, 500);
+			break;
+		case "!pbx": 
 			pbot.clearAllPanels();
-			for (i = 1; i < commands.length; i += 4) {
-				if (!isNaN(commands[i])) { //Did they submit a time?
-					time = commands[i];
-					i = 2;
-					if (time < 300) { time = 300; }//Until we resolve time-collision issue, force a min of 300ms.
+			setTimeout(function () { pbot.show(1); }, 500);
+			setTimeout(function () { pbot.show(2); }, 500);
+			setTimeout(function () { pbot.show(3); }, 500);
+			setTimeout(function () { pbot.show(4); }, 500);	
+			break;
+		case "!pb1a":
+			var pic = "";
+			var time = 500;//Default
+			var i;
+			var bGoodDrawing = true;
+	
+			//Let check all the data sent before we update display
+			for (i = 1; i < commands.length; i++) {
+				if (isNaN(commands[i])) {	//If time entered, skip validation.
+					if (pbot.isValidDrawMap(commands[i]) == false) {
+						bGoodDrawing = false;
+						break;
+					}
 				}
-				if (i < commands.length) pbot.gPBOT1PicArray.push(commands[i]);
-				if (i + 1 < commands.length) pbot.gPBOT2PicArray.push(commands[i + 1]);
-				if (i + 2 < commands.length) pbot.gPBOT3PicArray.push(commands[i + 2]);
-				if (i + 3 < commands.length) pbot.gPBOT4PicArray.push(commands[i + 3]);
 			}
-			loopAllFrames(time);//Loop forever.
-		} else {
-			client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
-		}
-	} else if (commands[0] === "!pbw") {
-		//TBD: Write and append long animations/pics to server.
-	} else if (commands[0] === "!pbr") {
-		//TBD: Read saved long animations/pics from server.
-	} else if (commands[0] === "!pbdz") {
-		if (commands[1] != null) {
-
+	
+			if (bGoodDrawing == true) {
+				pbot.clearPanel(1);
+				for (i = 1; i < commands.length; i++) {
+					if (!isNaN(commands[i])) { //Did they submit a time?
+						time = commands[i];
+						if (time < 300) { time = 300; }//Until we resolve time-collision issue, force a min of 300ms.
+					} else {
+						pic = commands[i];
+						pbot.gPBOT1PicArray.push(pic);
+					}
+				}
+				loopFramesPB1(time);//Loop forever.
+			} else {
+				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
+			}
+			break;
+		case "!pb2a":
+			var pic = "";
+			var time = 500;//Default
+			var i;
+			var bGoodDrawing = true;
+	
+			//Let check all the data sent before we update display
+			for (i = 1; i < commands.length; i++) {
+				if (isNaN(commands[i])) {	//If time entered, skip validation.
+					if (pbot.isValidDrawMap(commands[i]) == false) {
+						bGoodDrawing = false;
+						break;
+					}
+				}
+			}
+	
+			if (bGoodDrawing == true) {
+				pbot.clearPanel(2);
+				for (i = 1; i < commands.length; i++) {
+					if (!isNaN(commands[i])) { //Did they submit a time?
+						time = commands[i];
+						if (time < 300) { time = 300; }//Until we resolve time-collision issue, force a min of 300ms.
+					} else {
+						pic = commands[i];
+						pbot.gPBOT2PicArray.push(pic);
+					}
+				}
+				loopFramesPB2(time);//Loop forever.
+			} else {
+				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
+			}
+			break;
+		case "!pb3a":
+			var pic = "";
+			var time = 500;//Default
+			var i;
+			var bGoodDrawing = true;
+	
+			//Let check all the data sent before we update display
+			for (i = 1; i < commands.length; i++) {
+				if (isNaN(commands[i])) {	//If time entered, skip validation.
+					if (pbot.isValidDrawMap(commands[i]) == false) {
+						bGoodDrawing = false;
+						break;
+					}
+				}
+			}
+	
+			if (bGoodDrawing == true) {
+				pbot.clearPanel(3);
+				for (i = 1; i < commands.length; i++) {
+					if (!isNaN(commands[i])) { //Did they submit a time?
+						time = commands[i];
+						if (time < 300) { time = 300; }//Until we resolve time-collision issue, force a min of 300ms.
+					} else {
+						pic = commands[i];
+						pbot.gPBOT3PicArray.push(pic);
+					}
+				}
+				loopFramesPB3(time);//Loop forever.
+			} else {
+				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
+			}
+			break;
+		case "!pb4a":
+			var pic = "";
+			var time = 500;//Default
+			var i;
+			var bGoodDrawing = true;
+	
+			//Let check all the data sent before we update display
+			for (i = 1; i < commands.length; i++) {
+				if (isNaN(commands[i])) {	//If time entered, skip validation.
+					if (pbot.isValidDrawMap(commands[i]) == false) {
+						bGoodDrawing = false;
+						break;
+					}
+				}
+			}
+	
+			if (bGoodDrawing == true) {
+				pbot.clearPanel(4);
+				for (i = 1; i < commands.length; i++) {
+					if (!isNaN(commands[i])) { //Did they submit a time?
+						time = commands[i];
+						if (time < 300) { time = 300; }//Until we resolve time-collision issue, force a min of 300ms.
+					} else {
+						pic = commands[i];
+						pbot.gPBOT4PicArray.push(pic);
+					}
+				}
+				loopFramesPB4(time);//Loop forever.
+			} else {
+				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
+			}
+			break;
+		case "!pba":
+			var pic = "";
+			var time = 500;//Default
+			var i;
+			var panels;
+			var bGoodDrawing = true;
+	
+			//Let check all the data sent before we update display
+			for (i = 1; i < commands.length; i++) {
+				if (isNaN(commands[i])) {	//If time entered, skip validation.
+					if (pbot.isValidDrawMap(commands[i]) == false) {
+						bGoodDrawing = false;
+						break;
+					}
+				}
+			}
+	
+			if (bGoodDrawing == true) {
+				pbot.clearAllPanels();
+				for (i = 1; i < commands.length; i += 4) {
+					if (!isNaN(commands[i])) { //Did they submit a time?
+						time = commands[i];
+						i = 2;
+						if (time < 300) { time = 300; }//Until we resolve time-collision issue, force a min of 300ms.
+					}
+					if (i < commands.length) pbot.gPBOT1PicArray.push(commands[i]);
+					if (i + 1 < commands.length) pbot.gPBOT2PicArray.push(commands[i + 1]);
+					if (i + 2 < commands.length) pbot.gPBOT3PicArray.push(commands[i + 2]);
+					if (i + 3 < commands.length) pbot.gPBOT4PicArray.push(commands[i + 3]);
+				}
+				loopAllFrames(time);//Loop forever.
+			} else {
+				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
+			}
+			break;
+		case "!pbaz":
 			var buffer = new Buffer(commands[1], 'base64');
 			zlib.unzip(buffer, function (err, buffer) {
 				if (!err) {
-					//console.log(buffer.toString());
-					var drawCommand = "!pbd." + buffer.toString();//Decoded & decompressed
+					var drawCommand = "!pba." + buffer.toString();//Decoded & decompressed
+					//var drawCommand = "!pbax." + buffer.toString();//Decoded & decompressed
 					processCommand(user, drawCommand);
 				}
 				else {
 					console.log("ERROR UNCOMPRESSING!");
 				}
 			});
-		}
-	} else if (commands[0] === "!pbaz") {
-		var buffer = new Buffer(commands[1], 'base64');
-		zlib.unzip(buffer, function (err, buffer) {
-			if (!err) {
-				//console.log(buffer.toString());
-				var drawCommand = "!pba." + buffer.toString();//Decoded & decompressed
-				//var drawCommand = "!pbax." + buffer.toString();//Decoded & decompressed
-				processCommand(user, drawCommand);
-			}
-			else {
-				console.log("ERROR UNCOMPRESSING!");
-			}
-		});
-	} else if (commands[0] === "!pb1ax") {
+			break;
+			
+	}
+	/////////////////////////////////////////////////////////////////////////////
+	//Code below is for Frame differencing animation and displaying saved pictures.
+	//Neither works at this time, so disabled and unmerged to pbot.js until we
+	//stabilize the current code base.
+	/*
+	if (commands[0] === "!pb1ax") {
 		var pic = "";
 		var time = 500;//Default
 		var i;
@@ -943,40 +781,6 @@ function processCommand(user, message) {
 		} else {
 			client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
 		}
-	} else if (commands[0] === "!pbn") {
-		var numOfPix;
-		var colorOfPix;
-		var time = 0;
-
-		command = commands[1].split(/[a-z]+/);
-		numOfPix = command[1];//num of pixels to select
-		command = commands[1].split(/[0-9]+/);
-		colorOfPix = command[0];//add color
-
-		if (!isNaN(numOfPix) && numOfPix >= 1 && numOfPix <= 576) {
-			//Set Pixels
-			for (var j = 1; j <= numOfPix; j++) {
-				var curPanel = Math.floor(Math.random() * 4);// 0-3
-				var curPix = Math.floor(Math.random() * 144);// 0-143
-				var curColor = colorOfPix;
-
-				switch (curPanel) {
-					case 0://PB1
-						pbot.animateAllPanelPix(curPix, curColor, time += 200, pbot.pbotHW.pbot1Strip);
-						break;
-					case 1://PB2
-						pbot.animateAllPanelPix(curPix, curColor, time += 200, pbot.pbotHW.pbot2Strip);
-						break;
-					case 2://PB3
-						pbot.animateAllPanelPix(curPix, curColor, time += 200, pbot.pbotHW.pbot3Strip);
-						break;
-					case 3://PB4
-						pbot.animateAllPanelPix(curPix, curColor, time += 200, pbot.pbotHW.pbot4Strip);
-						break;
-
-				}
-			}
-		}
 	} else if (commands[0] === "!pb1f") { //draw saved drawing to panel.
 		//Proto: To pull a saved drawing and display. Includes a credit to artist.
 		var fileName = commands[1];
@@ -1038,13 +842,11 @@ function processCommand(user, message) {
 		} else {
 			client.action("laboratory424", user['display-name'] + ", Sorry, there isn't a saved drawing with that name.");
 		}
-	}else if (commands[0] === "!zddt") {
-		//if(commands[1] == "on"){lights.on();}
-		//if(commands[1] == "off"){lights.off();}
 	} else if (commands[0] === "!bs") {
 		//Game to try once pbot code cleaned up.
 		//pbs.chatIn(user, message);
 	}
+	*/
 
 	return bProcessed;
 }
