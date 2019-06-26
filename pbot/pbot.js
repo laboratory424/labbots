@@ -137,19 +137,276 @@ function init(pBotID){
 	}
 }
 /////////////////////////////////////////////////
-function processCommands(client, user, message){
-	var bIsOKToShow = false;
-	var commands = commStr.split(".", 145);// [0]=Bot, [1]=color, [2]=Pixel, can stack 12 pixel commands
-	var pixel;
+function processCommands(client, user, commStr){
+	var bProcessed = false;
+	var command;
+	var i;
+	var time = 1000;
+	var commands = commStr.split(".", 145);
 	var pixelColor;
-	var pixelMod; //Animated modifier for pixel: blink, pulse, etc
-	var p;
 
 	switch(commands[0]){
-		case "TBD":
-			//Move commmands here one by one.
+		case "!pb1":
+			var pixArr = [];
+			var clrArr = [];
+
+			//Load Array data
+			for (var i = 1; i < commands.length; i++) {
+				command = commands[i].split(/[a-z]+/);
+				pixArr.push(command[1]);//add pixel
+				command = commands[i].split(/[0-9]+/);
+				clrArr.push(command[0]);//add color
+			}
+			//Set Pixels
+			for (var j = 0; j < pixArr.length; j++) {
+				if (!isNaN(pixArr[j]) && pixArr[j] >= 1 && pixArr[j] <= 144) {
+					setPix(pbotHW.pbot1Strip.pixel(pixArr[j] - 1), clrArr[j]);
+				}
+			}
+			show(1);
 			break;
-		}
+		case "!pb1r":
+			for (var i = 1; i < commands.length; i++) {
+				command = commands[i].split(/[a-z]+/);
+				var row = command[1];
+				command = commands[i].split(/[0-9]+/);
+				pixelColor = command[0];
+				setRow(row, pixelColor, pbotHW.pbot1Strip);
+			}
+			show(1);
+			break;
+		case "!pb1c":
+			for (var i = 1; i < commands.length; i++) {
+				command = commands[i].split(/[a-z]+/);
+				var col = command[1];
+				command = commands[i].split(/[0-9]+/);
+				pixelColor = command[0];
+				setCol(col, pixelColor, pbotHW.pbot1Strip);
+			}
+			show(1);
+			break;
+		case "!pb1x":
+			clearPanel(1);
+			setTimeout(function () { show(1); }, 500);
+			break;
+		case "!pb2x":
+			clearPanel(2);
+			setTimeout(function () { show(2); }, 500);
+			break;
+		case "!pb3x":
+			clearPanel(3);
+			setTimeout(function () { show(3); }, 500);
+			break;
+		case "!pb4x":
+			clearPanel(4);
+			setTimeout(function () { show(4); }, 500);
+			break;
+		case "!pbx":
+			clearAllPanels();
+			setTimeout(function () { show(1); }, 500);
+			setTimeout(function () { show(2); }, 500);
+			setTimeout(function () { show(3); }, 500);
+			setTimeout(function () { show(4); }, 500);
+			break;
+		case "!pb1n":
+			var numOfPix;
+			var colorOfPix;
+			var time = 0;
+	
+			command = commands[1].split(/[a-z]+/);
+			numOfPix = command[1];//num of pixels to select
+			command = commands[1].split(/[0-9]+/);
+			colorOfPix = command[0];//add color
+	
+			if (!isNaN(numOfPix) && numOfPix >= 1 && numOfPix <= 144) {
+				clearPanel(1);
+				//Set Pixels
+				for (var j = 1; j <= numOfPix; j++) {
+					var curPix = Math.floor(Math.random() * 144);// 0-143
+					var curColor = colorOfPix;
+					animatePix(curPix, curColor, time += 300);
+				}
+			}
+			break;
+		case "!pbn":
+			var numOfPix;
+			var colorOfPix;
+			var time = 0;
+	
+			command = commands[1].split(/[a-z]+/);
+			numOfPix = command[1];//num of pixels to select
+			command = commands[1].split(/[0-9]+/);
+			colorOfPix = command[0];//add color
+	
+			if (!isNaN(numOfPix) && numOfPix >= 1 && numOfPix <= 576) {
+				//Set Pixels
+				for (var j = 1; j <= numOfPix; j++) {
+					var curPanel = Math.floor(Math.random() * 4);// 0-3
+					var curPix = Math.floor(Math.random() * 144);// 0-143
+					var curColor = colorOfPix;
+	
+					switch (curPanel) {
+						case 0://PB1
+							animateAllPanelPix(curPix, curColor, time += 200, pbotHW.pbot1Strip);
+							break;
+						case 1://PB2
+							animateAllPanelPix(curPix, curColor, time += 200, pbotHW.pbot2Strip);
+							break;
+						case 2://PB3
+							animateAllPanelPix(curPix, curColor, time += 200, pbotHW.pbot3Strip);
+							break;
+						case 3://PB4
+							animateAllPanelPix(curPix, curColor, time += 200, pbotHW.pbot4Strip);
+							break;
+	
+					}
+				}
+			}
+			break;
+		case "!pb1p":
+			var panelColor = commands[1];
+			clearPanel(1);
+			setTimeout(function () { pbotHW.pbot1Strip.color(getHexColor(panelColor)); show(1); }, 500);
+			break;
+		case "!pb2p":
+			var panelColor = commands[1];
+			clearPanel(2);
+			setTimeout(function () { pbotHW.pbot2Strip.color(getHexColor(panelColor)); show(2); }, 500);
+			break;
+		case "!pb3p":
+			var panelColor = commands[1];
+			clearPanel(3);
+			setTimeout(function () { pbotHW.pbot3Strip.color(getHexColor(panelColor)); show(3); }, 500);
+			break;
+		case "!pb4p":
+			var panelColor = commands[1];
+			clearPanel(4);
+			setTimeout(function () { pbotHW.pbot4Strip.color(getHexColor(panelColor)); show(4); }, 500);
+			break;
+		case "!pb1d":
+			var colors = commands[1];//RLE encoding representing picture
+
+			if (isValidDrawMap(colors) != false) {
+				clearPanel(1);
+				setTimeout(function () { drawPicture(colors, 1); show(1); }, 500);
+			} else {
+				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT1 cannot draw this. Bad syntax in drawing.");
+			}
+			break;
+		case "!pb2d":
+			var colors = commands[1];//RLE encoding representing picture
+
+			if (isValidDrawMap(colors) != false) {
+				clearPanel(2);
+				setTimeout(function () { drawPicture(colors, 2); show(2); }, 500);
+			} else {
+				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT2 cannot draw this. Bad syntax in drawing.");
+			}
+			break;
+		case "!pb3d":
+			var colors = commands[1];//RLE encoding representing picture
+
+			if (isValidDrawMap(colors) != false) {
+				clearPanel(3);
+				setTimeout(function () { drawPicture(colors, 3); show(3); }, 500);
+			} else {
+				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT3 cannot draw this. Bad syntax in drawing.");
+			}
+			break;
+		case "!pb4d":
+			var colors = commands[1];//RLE encoding representing picture
+
+			if (isValidDrawMap(colors) != false) {
+				clearPanel(4);
+				setTimeout(function () { drawPicture(colors, 4); show(4); }, 500);
+			} else {
+				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT4 cannot draw this. Bad syntax in drawing.");
+			}
+			break;
+		case "!pbd":
+			var bDrawPB1 = false;
+			var bDrawPB2 = false;
+			var bDrawPB3 = false;
+			var bDrawPB4 = false;
+	
+			var commLen = commands.length;
+			//PB1
+			if (commLen - 1 >= 1 && commands[1] !== '') {
+				if (isValidDrawMap(commands[1]) == false) {
+					client.action("laboratory424", user['display-name'] + ", Sorry, PBOT1 cannot draw this. Bad syntax in drawing.");
+				} else {
+					bDrawPB1 = true;
+				}
+			}
+			//PB2
+			if (commLen - 1 >= 2 && commands[2] !== '') {
+				if (isValidDrawMap(commands[2]) == false) {
+					client.action("laboratory424", user['display-name'] + ", Sorry, PBOT2 cannot draw this. Bad syntax in drawing.");
+				} else {
+					bDrawPB2 = true;
+				}
+			}
+			//PB3
+			if (commLen - 1 >= 3 && commands[3] !== '') {
+				if (isValidDrawMap(commands[3]) == false) {
+					client.action("laboratory424", user['display-name'] + ", Sorry, PBOT3 cannot draw this. Bad syntax in drawing.");
+				} else {
+					bDrawPB3 = true;
+				}
+			}
+			//PB4
+			if (commLen - 1 >= 4 && commands[4] !== '') {
+				if (isValidDrawMap(commands[4]) == false) {
+					client.action("laboratory424", user['display-name'] + ", Sorry, PBOT4 cannot draw this. Bad syntax in drawing.");
+				} else {
+					bDrawPB4 = true;
+				}
+			}
+			clearAllPanels();
+			if (bDrawPB1) {
+				clearPanel(1);
+				setTimeout(function () { drawPicture(commands[1], 1); show(1); }, 500);
+			}
+			if (bDrawPB2) {
+				clearPanel(2);
+				setTimeout(function () { drawPicture(commands[2], 2); show(2); }, 500);
+			}
+			if (bDrawPB3) {
+				clearPanel(3);
+				setTimeout(function () { drawPicture(commands[3], 3); show(3); }, 500);
+			}
+			if (bDrawPB4) {
+				clearPanel(4);
+				setTimeout(function () { drawPicture(commands[4], 4); show(4); }, 500);
+			}
+			break;
+		case "!pb1st": //Disabled for now. Doesn't work. Should map to all bots: !pbst
+			/*var str = commands[1];//str to draw
+			var time = 300;
+			var curCol = 11;
+			var pic;
+			var curChar;
+			var charIndex;
+			var picFrames = 5 * str.length+8;//8 is temp until we get this working. Just to push it off the screen
+						var approvedChars = new RegExp("^[0-9A-Za-z ]+$");
+
+						if(approvedChars.test(str)){
+					clearPanel(1);
+					for(var i = 0; i < picFrames; i++){
+								pic = pbot.generateFrame(str,i);//i represents index into str col data
+								pbot.gPBOT1PicArray.push(pic);
+					}
+					loopFrames(pbot.gPBOT1PicArray,time);
+					}else{
+				client.action("laboratory424",user['display-name'] + ", Sorry, Bad character in text.");
+			}*/
+			client.action("laboratory424", user['display-name'] + ", Sorry, scroll feature disabled for now.");
+			break;
+		case "!pbw"://TBD: Write and append long animations/pics to server.
+			break;
+		case "!pbr"://TBD: Read saved long animations/pics from server.
+			break;
+	}
 }
 /////////////////////////////////////////////////
 function generateFrame(str,startCol){
@@ -277,29 +534,29 @@ function setPix(pix, pixColorComm){
   	 var j;
   	 if(!isNaN (row) && row >= 1 && row <= 12){
   		  if(row == 1){
-  			  for( j = 0; j < 12; j++){this.setPix(strip.pixel(j), color);}
+  			  for( j = 0; j < 12; j++){setPix(strip.pixel(j), color);}
   		  }else if(row == 2){
-  			  for( j = 12; j < 24; j++){this.setPix(strip.pixel(j), color);}
+  			  for( j = 12; j < 24; j++){setPix(strip.pixel(j), color);}
   		  }else if(row == 3){
-  			  for( j = 24; j < 36; j++){this.setPix(strip.pixel(j), color);}
+  			  for( j = 24; j < 36; j++){setPix(strip.pixel(j), color);}
   		  }else if(row == 4){
-  			  for( j = 36; j < 48; j++){this.setPix(strip.pixel(j), color);}
+  			  for( j = 36; j < 48; j++){setPix(strip.pixel(j), color);}
   		  }else if(row == 5){
-  			  for( j = 48; j < 60; j++){this.setPix(strip.pixel(j), color);}
+  			  for( j = 48; j < 60; j++){setPix(strip.pixel(j), color);}
   		  }else if(row == 6){
-  			  for(var j = 60; j < 72; j++){this.setPix(strip.pixel(j), color);}
+  			  for(var j = 60; j < 72; j++){setPix(strip.pixel(j), color);}
   		  }else if(row == 7){
-  			  for(var j = 72; j < 84; j++){this.setPix(strip.pixel(j), color);}
+  			  for(var j = 72; j < 84; j++){setPix(strip.pixel(j), color);}
   		  }else if(row == 8){
-  			  for(var j = 84; j < 96; j++){this.setPix(strip.pixel(j), color);}
+  			  for(var j = 84; j < 96; j++){setPix(strip.pixel(j), color);}
   		  }else if(row == 9){
-  			  for(var j = 96; j < 108; j++){this.setPix(strip.pixel(j), color);}
+  			  for(var j = 96; j < 108; j++){setPix(strip.pixel(j), color);}
   		  }else if(row == 10){
-  			  for(var j = 108; j < 120; j++){this.setPix(strip.pixel(j), color);}
+  			  for(var j = 108; j < 120; j++){setPix(strip.pixel(j), color);}
   		  }else if(row == 11){
-  			  for(var j = 120; j < 132; j++){this.setPix(strip.pixel(j), color);}
+  			  for(var j = 120; j < 132; j++){setPix(strip.pixel(j), color);}
   		  }else if(row == 12){
-  			  for(var j = 132; j < 144; j++){this.setPix(strip.pixel(j), color);}
+  			  for(var j = 132; j < 144; j++){setPix(strip.pixel(j), color);}
   		  }
     	}
   }
@@ -310,24 +567,24 @@ function setCol (col, color, strip){
 	if(!isNaN (col) && col >= 1 && col <= 12){
 		var offset = col-1;
 
-		this.setPix(strip.pixel(basePixNum[0]+offset), color);
+		setPix(strip.pixel(basePixNum[0]+offset), color);
 
-		this.setPix(strip.pixel(basePixNum[1]-offset), color);
-		this.setPix(strip.pixel(basePixNum[2]+offset), color);
+		setPix(strip.pixel(basePixNum[1]-offset), color);
+		setPix(strip.pixel(basePixNum[2]+offset), color);
 
-		this.setPix(strip.pixel(basePixNum[3]-offset), color);
-		this.setPix(strip.pixel(basePixNum[4]+offset), color);
+		setPix(strip.pixel(basePixNum[3]-offset), color);
+		setPix(strip.pixel(basePixNum[4]+offset), color);
 
-		this.setPix(strip.pixel(basePixNum[5]-offset), color);
-		this.setPix(strip.pixel(basePixNum[6]+offset), color);
+		setPix(strip.pixel(basePixNum[5]-offset), color);
+		setPix(strip.pixel(basePixNum[6]+offset), color);
 
-		this.setPix(strip.pixel(basePixNum[7]-offset), color);
-		this.setPix(strip.pixel(basePixNum[8]+offset), color);
+		setPix(strip.pixel(basePixNum[7]-offset), color);
+		setPix(strip.pixel(basePixNum[8]+offset), color);
 
-		this.setPix(strip.pixel(basePixNum[9]-offset), color);
-		this.setPix(strip.pixel(basePixNum[10]+offset), color);
+		setPix(strip.pixel(basePixNum[9]-offset), color);
+		setPix(strip.pixel(basePixNum[10]+offset), color);
 
-		this.setPix(strip.pixel(basePixNum[11]-offset), color);
+		setPix(strip.pixel(basePixNum[11]-offset), color);
 	}
 }
 /////////////////////////////////////////////////
@@ -625,7 +882,7 @@ function getHexColor(pixColorComm){
   		if(numPixels > 144-curPix){
   			break;//stop drawing.
   		}
-  		curColor = this.getPictureColor(colorMap[i+1]);
+  		curColor = getPictureColor(colorMap[i+1]);
   		for(var j = 0; j < numPixels; j++){
   			pix = strip.pixel(curPix);
   			pix.color(curColor);
@@ -1110,12 +1367,12 @@ module.exports.gPBOT4IntervalPtr = gPBOT4IntervalPtr;
 //module.exports.init = init;
 module.exports.processCommands = processCommands;
 module.exports.generateFrame = generateFrame;
-module.exports.setPix = setPix;
-module.exports.setPix2 = setPix2;
+//module.exports.setPix = setPix;
+//module.exports.setPix2 = setPix2;
 module.exports.set_RCPixel = set_RCPixel;
 module.exports.say_text = say_text;
-module.exports.setRow = setRow;
-module.exports.setCol = setCol;
+//module.exports.setRow = setRow;
+//module.exports.setCol = setCol;
 module.exports.getHexColor = getHexColor;
 module.exports.getPictureColor = getPictureColor;
 module.exports.drawPicture = drawPicture;
