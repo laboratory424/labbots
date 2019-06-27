@@ -64,43 +64,40 @@ client.on('chat', function (channel, user, message, self) {
 
 //////////////////////////////////////////
 client.on("subscription", (channel, username, method, message, userstate) => {
-	var pic = "1z3r3z3r4z1r2f1r1z1r2f1r3z1r2f1r2f1r6z1r5f1r5z1r3f1r7z1r5f1r3z1r2f1r1f1r2f1r3z1r3f1r1f1r3f4r5f3r5z1r3f1r7z1r1f1r11z1r5z";
+	var pic = "1e3s3e3s4e1s2f1s1e1s2f1s3e1s2f1s2f1s6e1s5f1s5e1s3f1s7e1s5f1s3e1s2f1s1f1s2f1s3e1s3f1s1f1s3f4s5f3s5e1s3f1s7e1s1f1s11e1s5e";
+	var comm;
 
-	pbot.clearPanel();
-	pbot.drawPicture(pic, 1);
-	pbot.drawPicture(pic, 2);
-	pbot.drawPicture(pic, 3);
-	pbot.drawPicture(pic, 4);
-	pbot.show(1);
-	pbot.show(2);
-	pbot.show(3);
-	pbot.show(4);
+	comm = "!pb1d."+ pic;
+	pbot.processCommands(client,user,comm);
+	comm = "!pb2d."+pic;
+	pbot.processCommands(client,user,comm);
+	comm = "!pb3d."+pic;
+	pbot.processCommands(client,user,comm);
+	comm = "!pb4d."+pic;
+	pbot.processCommands(client,user,comm);
 
 	//BBs
 	fbot.throwbbs();
 
 	//PPB Launcher
-	fbot.addToQue(client, username, "fire3", true);
+	fbot.addToQue(client, username, "fire5", true);
 });
 
 //////////////////////////////////////////
 //TBD: Increase ball count by number of months
 client.on("resub", (channel, username, months, message, userstate, methods) => {
 	//let cumulativeMonths = ~~userstate["msg-param-cumulative-months"];
-	var pic = "1z3r3z3r4z1r2f1r1z1r2f1r3z1r2f1r2f1r6z1r5f1r5z1r3f1r7z1r5f1r3z1r2f1r1f1r2f1r3z1r3f1r1f1r3f4r5f3r5z1r3f1r7z1r1f1r11z1r5z";
+	var pic = "1e3s3e3s4e1s2f1s1e1s2f1s3e1s2f1s2f1s6e1s5f1s5e1s3f1s7e1s5f1s3e1s2f1s1f1s2f1s3e1s3f1s1f1s3f4s5f3s5e1s3f1s7e1s1f1s11e1s5e";
+	var comm;
 
-	pbot.clearPanel(1);
-	pbot.clearPanel(2);
-	pbot.clearPanel(3);
-	pbot.clearPanel(4);
-	pbot.drawPicture(pic, 1);
-	pbot.drawPicture(pic, 2);
-	pbot.drawPicture(pic, 3);
-	pbot.drawPicture(pic, 4);
-	pbot.show(1);
-	pbot.show(2);
-	pbot.show(3);
-	pbot.show(4);
+	comm = "!pb1d."+ pic;
+	pbot.processCommands(client,user,comm);
+	comm = "!pb2d."+pic;
+	pbot.processCommands(client,user,comm);
+	comm = "!pb3d."+pic;
+	pbot.processCommands(client,user,comm);
+	comm = "!pb4d."+pic;
+	pbot.processCommands(client,user,comm);
 
 	//BBs
 	fbot.throwbbs();
@@ -112,21 +109,17 @@ client.on("resub", (channel, username, months, message, userstate, methods) => {
 //////////////////////////////////////////
 client.on("subgift", (channel, username, streakMonths, recipient, methods, userstate) => {
 	let senderCount = ~~userstate["msg-param-sender-count"];//add balls based on count.
-	var pic = "1z3r3z3r4z1r2f1r1z1r2f1r3z1r2f1r2f1r6z1r5f1r5z1r3f1r7z1r5f1r3z1r2f1r1f1r2f1r3z1r3f1r1f1r3f4r5f3r5z1r3f1r7z1r1f1r11z1r5z";
-	var time = 500;
+	var pic = "1e3s3e3s4e1s2f1s1e1s2f1s3e1s2f1s2f1s6e1s5f1s5e1s3f1s7e1s5f1s3e1s2f1s1f1s2f1s3e1s3f1s1f1s3f4s5f3s5e1s3f1s7e1s1f1s11e1s5e";
+	var comm;
 
-	pbot.clearPanel(1);
-	pbot.clearPanel(2);
-	pbot.clearPanel(3);
-	pbot.clearPanel(4);
-	pbot.drawPicture(pic, 1);
-	pbot.drawPicture(pic, 2);
-	pbot.drawPicture(pic, 3);
-	pbot.drawPicture(pic, 4);
-	pbot.show(1);
-	pbot.show(2);
-	pbot.show(3);
-	pbot.show(4);
+	comm = "!pb1d."+ pic;
+	pbot.processCommands(client,user,comm);
+	comm = "!pb2d."+pic;
+	pbot.processCommands(client,user,comm);
+	comm = "!pb3d."+pic;
+	pbot.processCommands(client,user,comm);
+	comm = "!pb4d."+pic;
+	pbot.processCommands(client,user,comm);
 
 	//BBs
 	fbot.throwbbs();
@@ -137,20 +130,17 @@ client.on("subgift", (channel, username, streakMonths, recipient, methods, users
 
 //////////////////////////////////////////
 client.on("giftpaidupgrade", (channel, username, sender, userstate) => {
-	var pic = "1z3r3z3r4z1r2f1r1z1r2f1r3z1r2f1r2f1r6z1r5f1r5z1r3f1r7z1r5f1r3z1r2f1r1f1r2f1r3z1r3f1r1f1r3f4r5f3r5z1r3f1r7z1r1f1r11z1r5z";
+	var pic = "1e3s3e3s4e1s2f1s1e1s2f1s3e1s2f1s2f1s6e1s5f1s5e1s3f1s7e1s5f1s3e1s2f1s1f1s2f1s3e1s3f1s1f1s3f4s5f3s5e1s3f1s7e1s1f1s11e1s5e";
+	var comm;
 
-	pbot.clearPanel(1);
-	pbot.clearPanel(2);
-	pbot.clearPanel(3);
-	pbot.clearPanel(4);
-	pbot.drawPicture(pic, 1);
-	pbot.drawPicture(pic, 2);
-	pbot.drawPicture(pic, 3);
-	pbot.drawPicture(pic, 4);
-	pbot.show(1);
-	pbot.show(2);
-	pbot.show(3);
-	pbot.show(4);
+	comm = "!pb1d."+ pic;
+	pbot.processCommands(client,user,comm);
+	comm = "!pb2d."+pic;
+	pbot.processCommands(client,user,comm);
+	comm = "!pb3d."+pic;
+	pbot.processCommands(client,user,comm);
+	comm = "!pb4d."+pic;
+	pbot.processCommands(client,user,comm);
 
 	//BBs
 	fbot.throwbbs();
@@ -161,20 +151,17 @@ client.on("giftpaidupgrade", (channel, username, sender, userstate) => {
 
 //////////////////////////////////////////
 client.on("anongiftpaidupgrade", (channel, username, userstate) => {
-	var pic = "1z3r3z3r4z1r2f1r1z1r2f1r3z1r2f1r2f1r6z1r5f1r5z1r3f1r7z1r5f1r3z1r2f1r1f1r2f1r3z1r3f1r1f1r3f4r5f3r5z1r3f1r7z1r1f1r11z1r5z";
+	var pic = "1e3s3e3s4e1s2f1s1e1s2f1s3e1s2f1s2f1s6e1s5f1s5e1s3f1s7e1s5f1s3e1s2f1s1f1s2f1s3e1s3f1s1f1s3f4s5f3s5e1s3f1s7e1s1f1s11e1s5e";
+	var comm;
 
-	pbot.clearPanel(1);
-	pbot.clearPanel(2);
-	pbot.clearPanel(3);
-	pbot.clearPanel(4);
-	pbot.drawPicture(pic, 1);
-	pbot.drawPicture(pic, 2);
-	pbot.drawPicture(pic, 3);
-	pbot.drawPicture(pic, 4);
-	pbot.show(1);
-	pbot.show(2);
-	pbot.show(3);
-	pbot.show(4);
+	comm = "!pb1d."+ pic;
+	pbot.processCommands(client,user,comm);
+	comm = "!pb2d."+pic;
+	pbot.processCommands(client,user,comm);
+	comm = "!pb3d."+pic;
+	pbot.processCommands(client,user,comm);
+	comm = "!pb4d."+pic;
+	pbot.processCommands(client,user,comm);
 
 	//BBs
 	fbot.throwbbs();
@@ -285,7 +272,18 @@ function processUser(user, message) {
 		bProcessed = true;
 	}else if(cfg.adminUsr.includes(user.username) && message.includes("doit")){
 		//fbot.throwbbs();
-		fbot.addToQue(client, user, "fire2", true);
+		var pic = "1e3s3e3s4e1s2f1s1e1s2f1s3e1s2f1s2f1s6e1s5f1s5e1s3f1s7e1s5f1s3e1s2f1s1f1s2f1s3e1s3f1s1f1s3f4s5f3s5e1s3f1s7e1s1f1s11e1s5e";
+		var comm;
+
+		comm = "!pb1d."+ pic;
+		pbot.processCommands(client,user,comm);
+		comm = "!pb2d."+pic;
+		pbot.processCommands(client,user,comm);
+		comm = "!pb3d."+pic;
+		pbot.processCommands(client,user,comm);
+		comm = "!pb4d."+pic;
+		pbot.processCommands(client,user,comm);
+		//fbot.addToQue(client, user, "fire2", true);
 		bProcessed = true;
 	}
 
@@ -328,7 +326,7 @@ function processCommand(user, message) {
 		case "!pb1c":
 		case "!pb1n"://Random pixel draw, !pb1n.[color][number of pix]
 		case "!pbn":
-		case "!pb1p"://Set panel color, !pb1p.m
+		case "!pb1p"://Set panel color
 		case "!pb1p":
 		case "!pb2p":
 		case "!pb3p":
@@ -338,588 +336,20 @@ function processCommand(user, message) {
 		case "!pb3d":
 		case "!pb4d":
 		case "!pbd":
+		case "!pbdz":
+		case "!pb1x"://Clear panel(s)
+		case "!pb2x":
+		case "!pb3x":
+		case "!pb4x":
+		case "!pbx":
+		case "!pb1a"://Animation
+		case "!pb2a":
+		case "!pb3a":
+		case "!pb4a":
+		case "!pba":
+		case "!pbaz":
 			pbot.processCommands(client, user, commStr);
 			break;
-		case "!pbdz"://TBD: should be able to move to pbot.js
-			if (commands[1] != null) {
-
-				var buffer = new Buffer(commands[1], 'base64');
-				zlib.unzip(buffer, function (err, buffer) {
-					if (!err) {
-						var drawCommand = "!pbd." + buffer.toString();//Decoded & decompressed
-						processCommand(user, drawCommand);
-					}
-					else {
-						console.log("ERROR UNCOMPRESSING!");
-					}
-				});
-			}
-			break;
-		//We need to keep clear frames here until we move animation to pbot.js
-		//When moved, there is a disconnect with the intervals for some reason.
-		case "!pb1x": 
-			pbot.clearPanel(1);
-			setTimeout(function () { pbot.show(1); }, 500);
-			break;
-		case "!pb2x":
-			pbot.clearPanel(2);
-			setTimeout(function () { pbot.show(2); }, 500);
-			break;
-		case "!pb3x":
-			pbot.clearPanel(3);
-			setTimeout(function () { pbot.show(3); }, 500);
-			break;
-		case "!pb4x":
-			pbot.clearPanel(4);
-			setTimeout(function () { pbot.show(4); }, 500);
-			break;
-		case "!pbx": 
-			pbot.clearAllPanels();
-			setTimeout(function () { pbot.show(1); }, 500);
-			setTimeout(function () { pbot.show(2); }, 500);
-			setTimeout(function () { pbot.show(3); }, 500);
-			setTimeout(function () { pbot.show(4); }, 500);	
-			break;
-		case "!pb1a":
-			var pic = "";
-			var time = 500;//Default
-			var i;
-			var bGoodDrawing = true;
-	
-			//Let check all the data sent before we update display
-			for (i = 1; i < commands.length; i++) {
-				if (isNaN(commands[i])) {	//If time entered, skip validation.
-					if (pbot.isValidDrawMap(commands[i]) == false) {
-						bGoodDrawing = false;
-						break;
-					}
-				}
-			}
-	
-			if (bGoodDrawing == true) {
-				pbot.clearPanel(1);
-				for (i = 1; i < commands.length; i++) {
-					if (!isNaN(commands[i])) { //Did they submit a time?
-						time = commands[i];
-						if (time < 300) { time = 300; }//Until we resolve time-collision issue, force a min of 300ms.
-					} else {
-						pic = commands[i];
-						pbot.gPBOT1PicArray.push(pic);
-					}
-				}
-				loopFramesPB1(time);//Loop forever.
-			} else {
-				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
-			}
-			break;
-		case "!pb2a":
-			var pic = "";
-			var time = 500;//Default
-			var i;
-			var bGoodDrawing = true;
-	
-			//Let check all the data sent before we update display
-			for (i = 1; i < commands.length; i++) {
-				if (isNaN(commands[i])) {	//If time entered, skip validation.
-					if (pbot.isValidDrawMap(commands[i]) == false) {
-						bGoodDrawing = false;
-						break;
-					}
-				}
-			}
-	
-			if (bGoodDrawing == true) {
-				pbot.clearPanel(2);
-				for (i = 1; i < commands.length; i++) {
-					if (!isNaN(commands[i])) { //Did they submit a time?
-						time = commands[i];
-						if (time < 300) { time = 300; }//Until we resolve time-collision issue, force a min of 300ms.
-					} else {
-						pic = commands[i];
-						pbot.gPBOT2PicArray.push(pic);
-					}
-				}
-				loopFramesPB2(time);//Loop forever.
-			} else {
-				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
-			}
-			break;
-		case "!pb3a":
-			var pic = "";
-			var time = 500;//Default
-			var i;
-			var bGoodDrawing = true;
-	
-			//Let check all the data sent before we update display
-			for (i = 1; i < commands.length; i++) {
-				if (isNaN(commands[i])) {	//If time entered, skip validation.
-					if (pbot.isValidDrawMap(commands[i]) == false) {
-						bGoodDrawing = false;
-						break;
-					}
-				}
-			}
-	
-			if (bGoodDrawing == true) {
-				pbot.clearPanel(3);
-				for (i = 1; i < commands.length; i++) {
-					if (!isNaN(commands[i])) { //Did they submit a time?
-						time = commands[i];
-						if (time < 300) { time = 300; }//Until we resolve time-collision issue, force a min of 300ms.
-					} else {
-						pic = commands[i];
-						pbot.gPBOT3PicArray.push(pic);
-					}
-				}
-				loopFramesPB3(time);//Loop forever.
-			} else {
-				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
-			}
-			break;
-		case "!pb4a":
-			var pic = "";
-			var time = 500;//Default
-			var i;
-			var bGoodDrawing = true;
-	
-			//Let check all the data sent before we update display
-			for (i = 1; i < commands.length; i++) {
-				if (isNaN(commands[i])) {	//If time entered, skip validation.
-					if (pbot.isValidDrawMap(commands[i]) == false) {
-						bGoodDrawing = false;
-						break;
-					}
-				}
-			}
-	
-			if (bGoodDrawing == true) {
-				pbot.clearPanel(4);
-				for (i = 1; i < commands.length; i++) {
-					if (!isNaN(commands[i])) { //Did they submit a time?
-						time = commands[i];
-						if (time < 300) { time = 300; }//Until we resolve time-collision issue, force a min of 300ms.
-					} else {
-						pic = commands[i];
-						pbot.gPBOT4PicArray.push(pic);
-					}
-				}
-				loopFramesPB4(time);//Loop forever.
-			} else {
-				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
-			}
-			break;
-		case "!pba":
-			var pic = "";
-			var time = 500;//Default
-			var i;
-			var panels;
-			var bGoodDrawing = true;
-	
-			//Let check all the data sent before we update display
-			for (i = 1; i < commands.length; i++) {
-				if (isNaN(commands[i])) {	//If time entered, skip validation.
-					if (pbot.isValidDrawMap(commands[i]) == false) {
-						bGoodDrawing = false;
-						break;
-					}
-				}
-			}
-	
-			if (bGoodDrawing == true) {
-				pbot.clearAllPanels();
-				for (i = 1; i < commands.length; i += 4) {
-					if (!isNaN(commands[i])) { //Did they submit a time?
-						time = commands[i];
-						i = 2;
-						if (time < 300) { time = 300; }//Until we resolve time-collision issue, force a min of 300ms.
-					}
-					if (i < commands.length) pbot.gPBOT1PicArray.push(commands[i]);
-					if (i + 1 < commands.length) pbot.gPBOT2PicArray.push(commands[i + 1]);
-					if (i + 2 < commands.length) pbot.gPBOT3PicArray.push(commands[i + 2]);
-					if (i + 3 < commands.length) pbot.gPBOT4PicArray.push(commands[i + 3]);
-				}
-				loopAllFrames(time);//Loop forever.
-			} else {
-				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
-			}
-			break;
-		case "!pbaz":
-			var buffer = new Buffer(commands[1], 'base64');
-			zlib.unzip(buffer, function (err, buffer) {
-				if (!err) {
-					var drawCommand = "!pba." + buffer.toString();//Decoded & decompressed
-					//var drawCommand = "!pbax." + buffer.toString();//Decoded & decompressed
-					processCommand(user, drawCommand);
-				}
-				else {
-					console.log("ERROR UNCOMPRESSING!");
-				}
-			});
-			break;
-			
 	}
-	/////////////////////////////////////////////////////////////////////////////
-	//Code below is for Frame differencing animation and displaying saved pictures.
-	//Neither works at this time, so disabled and unmerged to pbot.js until we
-	//stabilize the current code base.
-	/*
-	if (commands[0] === "!pb1ax") {
-		var pic = "";
-		var time = 500;//Default
-		var i;
-		var bGoodDrawing = true;
-		var picArray = [];
-		var picDiffArray = [];
-		var pixMap;
-
-		//Let check all the data sent before we update display
-		for (i = 1; i < commands.length; i++) {
-			if (isNaN(commands[i])) {	//If time entered, skip validation.
-				if (pbot.isValidDrawMap(commands[i]) == false) {
-					bGoodDrawing = false;
-					break;
-				}
-			}
-		}
-
-		if (bGoodDrawing == true) {
-			pbot.clearPanel(1);
-			for (i = 1; i < commands.length; i++) {
-				if (!isNaN(commands[i])) { //Did they submit a time?
-					time = commands[i];
-					if (time < 300) { time = 300; }//TEMP, testing locking to 300ms
-				} else {
-					pixMap = pbot.rleToPixPanel(commands[i]); //convert to pix map
-					picArray.push(pixMap); //put into array for processing
-				}
-			}
-			//diff frames.
-			picDiffArray = pbot.diffPanelFrames(picArray);
-			//loop
-			for (j = 0; j < picDiffArray.length; j++) {
-				pbot.gPBOT1PicArray.push(picDiffArray[j]); //put into array for processing
-			}
-			pbot.loopDiffFramesPB1(time);//Loop forever.
-		}
-	} else if (commands[0] === "!pb2ax") {
-		var pic = "";
-		var time = 500;//Default
-		var i;
-		var bGoodDrawing = true;
-		var picArray = [];
-		var picDiffArray = [];
-		var pixMap;
-
-		//Let check all the data sent before we update display
-		for (i = 1; i < commands.length; i++) {
-			if (isNaN(commands[i])) {	//If time entered, skip validation.
-				if (pbot.isValidDrawMap(commands[i]) == false) {
-					bGoodDrawing = false;
-					break;
-				}
-			}
-		}
-
-		if (bGoodDrawing == true) {
-			pbot.clearPanel(2);
-			for (i = 1; i < commands.length; i++) {
-				if (!isNaN(commands[i])) { //Did they submit a time?
-					time = commands[i];
-				} else {
-					pixMap = pbot.rleToPixPanel(commands[i]); //convert to pix map
-					picArray.push(pixMap); //put into array for processing
-				}
-			}
-			//diff frames.
-			picDiffArray = pbot.diffPanelFrames(picArray);
-			//loop
-			for (j = 0; j < picDiffArray.length; j++) {
-				pbot.gPBOT2PicArray.push(picDiffArray[j]); //put into array for processing
-			}
-			loopDiffFramesPB2(time);//Loop forever.
-		}
-	} else if (commands[0] === "!pb3ax") {
-		var pic = "";
-		var time = 500;//Default
-		var i;
-		var bGoodDrawing = true;
-		var picArray = [];
-		var picDiffArray = [];
-		var pixMap;
-
-		//Let check all the data sent before we update display
-		for (i = 1; i < commands.length; i++) {
-			if (isNaN(commands[i])) {	//If time entered, skip validation.
-				if (pbot.isValidDrawMap(commands[i]) == false) {
-					bGoodDrawing = false;
-					break;
-				}
-			}
-		}
-
-		if (bGoodDrawing == true) {
-			pbot.clearPanel(3);
-			for (i = 1; i < commands.length; i++) {
-				if (!isNaN(commands[i])) { //Did they submit a time?
-					time = commands[i];
-				} else {
-					pixMap = pbot.rleToPixPanel(commands[i]); //convert to pix map
-					picArray.push(pixMap); //put into array for processing
-				}
-			}
-			//diff frames.
-			picDiffArray = pbot.diffPanelFrames(picArray);
-			//loop
-			for (j = 0; j < picDiffArray.length; j++) {
-				pbot.gPBOT3PicArray.push(picDiffArray[j]); //put into array for processing
-			}
-			loopDiffFramesPB3(time);//Loop forever.
-		}
-	} else if (commands[0] === "!pb4ax") {
-		var pic = "";
-		var time = 500;//Default
-		var i;
-		var bGoodDrawing = true;
-		var picArray = [];
-		var picDiffArray = [];
-		var pixMap;
-
-		//Let check all the data sent before we update display
-		for (i = 1; i < commands.length; i++) {
-			if (isNaN(commands[i])) {	//If time entered, skip validation.
-				if (pbot.isValidDrawMap(commands[i]) == false) {
-					bGoodDrawing = false;
-					break;
-				}
-			}
-		}
-
-		if (bGoodDrawing == true) {
-			pbot.clearPanel(4);//restore if flag doesn't work below.
-			//pbot.gClearPB4 = true;//Set flag to purge previous animation.
-			for (i = 1; i < commands.length; i++) {
-				if (!isNaN(commands[i])) { //Did they submit a time?
-					time = commands[i];
-				} else {
-					pixMap = pbot.rleToPixPanel(commands[i]); //convert to pix map
-					picArray.push(pixMap); //put into array for processing
-				}
-			}
-			//diff frames.
-			picDiffArray = pbot.diffPanelFrames(picArray);
-			//loop
-			for (j = 0; j < picDiffArray.length; j++) {
-				pbot.gPBOT4PicArray.push(picDiffArray[j]); //put into array for processing
-			}
-			loopDiffFramesPB4(time);//Loop forever.
-		}
-	} else if (commands[0] === "!pbax") {
-		var pic = "";
-		var time = 500;//Default
-		var i;
-		var panels;
-		var bGoodDrawing = true;
-		var picArray1 = [];
-		var picArray2 = [];
-		var picArray3 = [];
-		var picArray4 = [];
-		var picDiffArray1 = [];
-		var picDiffArray2 = [];
-		var picDiffArray3 = [];
-		var picDiffArray4 = [];
-		var pixMap;
-
-		//Let check all the data sent before we update display
-		for (i = 1; i < commands.length; i++) {
-			if (isNaN(commands[i])) {	//If time entered, skip validation.
-				if (pbot.isValidDrawMap(commands[i]) == false) {
-					bGoodDrawing = false;
-					break;
-				}
-			}
-		}
-
-		if (bGoodDrawing == true) {
-			pbot.clearAllPanels();
-			for (i = 1; i < commands.length; i += 4) {
-				if (!isNaN(commands[i])) { //Did they submit a time?
-					time = commands[i];
-					//if (time < 300) { time = 300; }//Temp, testing.
-					i = 2;
-				}
-
-				if (i < commands.length) {
-					pixMap = pbot.rleToPixPanel(commands[i]); //convert to pix map
-					picArray1.push(pixMap);
-				}
-				if (i + 1 < commands.length) {
-					pixMap = pbot.rleToPixPanel(commands[i + 1]); //convert to pix map
-					picArray2.push(pixMap);
-				}
-				if (i + 2 < commands.length) {
-					pixMap = pbot.rleToPixPanel(commands[i + 2]); //convert to pix map
-					picArray3.push(pixMap);
-				}
-				if (i + 3 < commands.length) {
-					pixMap = pbot.rleToPixPanel(commands[i + 3]); //convert to pix map
-					picArray4.push(pixMap);
-				}
-			}
-			//diff frames.
-			picDiffArray1 = pbot.diffPanelFrames(picArray1);
-			picDiffArray2 = pbot.diffPanelFrames(picArray2);
-			picDiffArray3 = pbot.diffPanelFrames(picArray3);
-			picDiffArray4 = pbot.diffPanelFrames(picArray4);
-			//loop
-			for (j = 0; j < picDiffArray1.length; j++) {
-				pbot.gPBOT1PicArray.push(picDiffArray1[j]); //put into array for processing
-				pbot.gPBOT2PicArray.push(picDiffArray2[j]); //put into array for processing
-				pbot.gPBOT3PicArray.push(picDiffArray3[j]); //put into array for processing
-				pbot.gPBOT4PicArray.push(picDiffArray4[j]); //put into array for processing
-			}
-			loopAllDiffFrames(time);//Loop forever.
-		} else {
-			client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
-		}
-	} else if (commands[0] === "!pb1f") { //draw saved drawing to panel.
-		//Proto: To pull a saved drawing and display. Includes a credit to artist.
-		var fileName = commands[1];
-		var fileStr = "";
-
-		fileStr = pbot.getSavedDrawing(fileName);
-		if (fileStr !== '') {
-			var strs = fileStr.split(".", 2);//0 is string, 1 is credit
-			console.log("str: " + strs[0]);
-			console.log("credit:" + strs[1]);
-			pbot.clearPanel(1);
-			setTimeout(function () { pbot.drawPicture(strs[0], 1); pbot.show(1); }, 500);
-			client.action("laboratory424", "  CREDIT: " + fileName + " on PixelBot1 is by " + strs[1]);
-		} else {
-			client.action("laboratory424", user['display-name'] + ", Sorry, there isn't a saved drawing with that name.");
-		}
-	} else if (commands[0] === "!pb2f") { //draw saved drawing to panel.
-		var fileName = commands[1];
-		var fileStr = "";
-
-		fileStr = pbot.getSavedDrawing(fileName);
-		if (fileStr !== '') {
-			var strs = fileStr.split(".", 2);//0 is string, 1 is credit
-			console.log("str: " + strs[0]);
-			console.log("credit:" + strs[1]);
-			pbot.clearPanel(2);
-			setTimeout(function () { pbot.drawPicture(strs[0], 2); pbot.show(2); }, 500);
-			client.action("laboratory424", "  CREDIT: " + fileName + " on PixelBot2 is by " + strs[1]);
-		} else {
-			client.action("laboratory424", user['display-name'] + ", Sorry, there isn't a saved drawing with that name.");
-		}
-	} else if (commands[0] === "!pb3f") { //draw saved drawing to panel.
-		var fileName = commands[1];
-		var fileStr = "";
-
-		fileStr = pbot.getSavedDrawing(fileName);
-		if (fileStr !== '') {
-			var strs = fileStr.split(".", 2);//0 is string, 1 is credit
-			console.log("str: " + strs[0]);
-			console.log("credit:" + strs[1]);
-			pbot.clearPanel(3);
-			setTimeout(function () { pbot.drawPicture(strs[0], 3); pbot.show(3); }, 500);
-			client.action("laboratory424", "  CREDIT: " + fileName + " on PixelBot3 is by " + strs[1]);
-		} else {
-			client.action("laboratory424", user['display-name'] + ", Sorry, there isn't a saved drawing with that name.");
-		}
-	} else if (commands[0] === "!pb4f") { //draw saved drawing to panel.
-		var fileName = commands[1];
-		var fileStr = "";
-
-		fileStr = pbot.getSavedDrawing(fileName);
-		if (fileStr !== '') {
-			var strs = fileStr.split(".", 2);//0 is string, 1 is credit
-			console.log("str: " + strs[0]);
-			console.log("credit:" + strs[1]);
-			pbot.clearPanel(4);
-			setTimeout(function () { pbot.drawPicture(strs[0], 4); pbot.show(4); }, 500);
-			client.action("laboratory424", "  CREDIT: " + fileName + " on PixelBot4 is by " + strs[1]);
-		} else {
-			client.action("laboratory424", user['display-name'] + ", Sorry, there isn't a saved drawing with that name.");
-		}
-	} else if (commands[0] === "!bs") {
-		//Game to try once pbot code cleaned up.
-		//pbs.chatIn(user, message);
-	}
-	*/
-
 	return bProcessed;
-}
-
-/////////////////////////////////////////////////
-/////////////////////////////////////////////////
-/*
-The functions below need to be moved into pbot.js. When I attempt this
-I crash due to some issue with the way I'm declaring or scope of data
-like gPBOT1IntervalPtr and gPBOT1PicArray as well as other exported
-supporting functions.
-*/
-
-/////////////////////////////////////////////////////////
-//loopFrames()
-//	Takes an array of RLE picture commands and displayes them based on time. Loops forever.
-//	TBD: Add param and associated command to only go through animation once. Useful for gaming/effects
-/////////////////////////////////////////////////////////
-function loopFramesPB1(time) {
-	var i = 0;
-	pbot.gPBOT1IntervalPtr = setInterval(function () {
-		if (i == pbot.gPBOT1PicArray.length) {i = 0;}
-		pbot.drawPicture(pbot.gPBOT1PicArray[i], 1);
-		i++;
-		pbot.show(1);
-	}, time);
-}
-
-function loopFramesPB2(time) {
-	var i = 0;
-	pbot.gPBOT2IntervalPtr = setInterval(function () {
-		if (i == pbot.gPBOT2PicArray.length) {i = 0;}
-		pbot.drawPicture(pbot.gPBOT2PicArray[i], 2);
-		i++;
-		pbot.show(2);
-	}, time);
-}
-
-function loopFramesPB3(time) {
-	var i = 0;
-	pbot.gPBOT3IntervalPtr = setInterval(function () {
-		if (i == pbot.gPBOT3PicArray.length) {i = 0;}
-		pbot.drawPicture(pbot.gPBOT3PicArray[i], 3);
-		i++;
-		pbot.show(3);
-	}, time);
-}
-
-function loopFramesPB4(time) {
-	var i = 0;
-	pbot.gPBOT4IntervalPtr = setInterval(function () {
-		if (i == pbot.gPBOT4PicArray.length) {i = 0;}
-		pbot.drawPicture(pbot.gPBOT4PicArray[i], 4);
-		i++;
-		pbot.show(4);
-	}, time);
-}
-
-function loopAllFrames(time) {
-	//For now, using pbot4 ptr and array to set it up. Need to change later.
-	var i = 0;
-	pbot.gPBOT4IntervalPtr = setInterval(function () {
-		if (i == pbot.gPBOT4PicArray.length) {
-			i = 0;
-		}
-		pbot.drawPicture(pbot.gPBOT1PicArray[i], 1);
-		pbot.drawPicture(pbot.gPBOT2PicArray[i], 2);
-		pbot.drawPicture(pbot.gPBOT3PicArray[i], 3);
-		pbot.drawPicture(pbot.gPBOT4PicArray[i], 4);
-		i++;
-		pbot.show(1);
-		pbot.show(2);
-		pbot.show(3);
-		pbot.show(4);
-	}, time);
 }
