@@ -219,7 +219,7 @@ function randomFire(balls, time){
 					//setTimeout(function(){if(gMagEmpty){gLostShots++}}, time +=200);
 					setTimeout(function(){if(!gMagEmpty){fbotHW.launcher.start(gSpeed)}}, time+=200); //Speed motor up
 					setTimeout(function(){if(!gMagEmpty){rotate(fbotHW.loader,165)}}, time+=2500); //Wait 2.5s for motor, Drop Ball
-					setTimeout(function(){if(!gMagEmpty){rotate(fbotHW.loader,70)}}, time+=750); //Wait .75s, Push into motor
+					setTimeout(function(){if(!gMagEmpty){rotate(fbotHW.loader,80)}}, time+=750); //Wait .75s, Push into motor
 					setTimeout(function(){if(!gMagEmpty){checkLoader()}}, time+=800);//verify no jams
 					setTimeout(function(){if(!gMagEmpty){rotate(fbotHW.loader,100)}}, time+=500); //Wait 0.5s, Return to start pos
 					
@@ -232,14 +232,14 @@ function randomFire(balls, time){
 					setTimeout(function(){if(!gMagEmpty){randomTurretCoord(fbotHW)}}, time+=300);
 	
 					setTimeout(function(){if(!gMagEmpty){rotate(fbotHW.loader,165)}}, time+=300); //Wait for motor, Drop Ball
-					setTimeout(function(){if(!gMagEmpty){rotate(fbotHW.loader,70)}}, time+=750); //Push into motor
+					setTimeout(function(){if(!gMagEmpty){rotate(fbotHW.loader,80)}}, time+=750); //Push into motor
 					setTimeout(function(){if(!gMagEmpty){checkLoader()}}, time+=800);//verify no jams
 					setTimeout(function(){if(!gMagEmpty){rotate(fbotHW.loader,100)}}, time+=500); //Return to start pos
 				}
 			}
 			//ISSUE: If lost shot, lost coords. Could bypass center arm/waist. 
 			//ISSUE: If crash, lose queue. So, need to write out.
-			setTimeout(function(){fbotHW.launcher.stop()}, time+=200); //was 500. Stop motor
+			setTimeout(function(){fbotHW.launcher.stop()}, time+=500); //was 200. Stop motor
 			setTimeout(function(){rotate(fbotHW.loader,100)}, time+=200); //was 500. Return to start pos
 			setTimeout(function(){rotate(fbotHW.armR,80)}, time+=500); //was 1000. center arm
 			setTimeout(function(){rotate(fbotHW.waist,120)}, time+=500); //was 1000. center waist

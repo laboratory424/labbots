@@ -5,7 +5,8 @@
 //to cause scope issues.
 
 //Certain functionality should be pushed into draw folder/file.
-
+var fs = require("fs");
+var zlib = require("zlib");
 var pixel = require("node-pixel");
 var five = require("johnny-five");
 var ports = [
@@ -380,6 +381,197 @@ function processCommands(client, user, commStr){
 				setTimeout(function () { drawPicture(commands[4], 4); show(4); }, 500);
 			}
 			break;
+		case "!pbdz":
+			if (commands[1] != null) {
+
+				var buffer = new Buffer(commands[1], 'base64');
+				zlib.unzip(buffer, function (err, buffer) {
+					if (!err) {
+						var drawCommand = "!pbd." + buffer.toString();//Decoded & decompressed
+						processCommands(client, user, drawCommand);
+					}
+					else {
+						console.log("ERROR UNCOMPRESSING!");
+					}
+				});
+			}
+			break;
+		case "!pb1a":
+			var pic = "";
+			var time = 500;//Default
+			var i;
+			var bGoodDrawing = true;
+	
+			//Let check all the data sent before we update display
+			for (i = 1; i < commands.length; i++) {
+				if (isNaN(commands[i])) {	//If time entered, skip validation.
+					if (isValidDrawMap(commands[i]) == false) {
+						bGoodDrawing = false;
+						break;
+					}
+				}
+			}
+	
+			if (bGoodDrawing == true) {
+				clearPanel(1);
+				for (i = 1; i < commands.length; i++) {
+					if (!isNaN(commands[i])) { //Did they submit a time?
+						time = commands[i];
+						if (time < 300) { time = 300; }//Until we resolve time-collision issue, force a min of 300ms.
+					} else {
+						pic = commands[i];
+						gPBOT1PicArray.push(pic);
+					}
+				}
+				loopFramesPB1(time);//Loop forever.
+			} else {
+				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
+			}
+			break;
+		case "!pb2a":
+			var pic = "";
+			var time = 500;//Default
+			var i;
+			var bGoodDrawing = true;
+	
+			//Let check all the data sent before we update display
+			for (i = 1; i < commands.length; i++) {
+				if (isNaN(commands[i])) {	//If time entered, skip validation.
+					if (isValidDrawMap(commands[i]) == false) {
+						bGoodDrawing = false;
+						break;
+					}
+				}
+			}
+	
+			if (bGoodDrawing == true) {
+				clearPanel(2);
+				for (i = 1; i < commands.length; i++) {
+					if (!isNaN(commands[i])) { //Did they submit a time?
+						time = commands[i];
+						if (time < 300) { time = 300; }//Until we resolve time-collision issue, force a min of 300ms.
+					} else {
+						pic = commands[i];
+						gPBOT2PicArray.push(pic);
+					}
+				}
+				loopFramesPB2(time);//Loop forever.
+			} else {
+				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
+			}
+			break;
+		case "!pb3a":
+			var pic = "";
+			var time = 500;//Default
+			var i;
+			var bGoodDrawing = true;
+	
+			//Let check all the data sent before we update display
+			for (i = 1; i < commands.length; i++) {
+				if (isNaN(commands[i])) {	//If time entered, skip validation.
+					if (isValidDrawMap(commands[i]) == false) {
+						bGoodDrawing = false;
+						break;
+					}
+				}
+			}
+	
+			if (bGoodDrawing == true) {
+				clearPanel(3);
+				for (i = 1; i < commands.length; i++) {
+					if (!isNaN(commands[i])) { //Did they submit a time?
+						time = commands[i];
+						if (time < 300) { time = 300; }//Until we resolve time-collision issue, force a min of 300ms.
+					} else {
+						pic = commands[i];
+						gPBOT3PicArray.push(pic);
+					}
+				}
+				loopFramesPB3(time);//Loop forever.
+			} else {
+				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
+			}
+			break;
+		case "!pb4a":
+			var pic = "";
+			var time = 500;//Default
+			var i;
+			var bGoodDrawing = true;
+	
+			//Let check all the data sent before we update display
+			for (i = 1; i < commands.length; i++) {
+				if (isNaN(commands[i])) {	//If time entered, skip validation.
+					if (isValidDrawMap(commands[i]) == false) {
+						bGoodDrawing = false;
+						break;
+					}
+				}
+			}
+	
+			if (bGoodDrawing == true) {
+				clearPanel(4);
+				for (i = 1; i < commands.length; i++) {
+					if (!isNaN(commands[i])) { //Did they submit a time?
+						time = commands[i];
+						if (time < 300) { time = 300; }//Until we resolve time-collision issue, force a min of 300ms.
+					} else {
+						pic = commands[i];
+						gPBOT4PicArray.push(pic);
+					}
+				}
+				loopFramesPB4(time);//Loop forever.
+			} else {
+				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
+			}
+			break;
+		case "!pba":
+			var pic = "";
+			var time = 500;//Default
+			var i;
+			var panels;
+			var bGoodDrawing = true;
+	
+			//Let check all the data sent before we update display
+			for (i = 1; i < commands.length; i++) {
+				if (isNaN(commands[i])) {	//If time entered, skip validation.
+					if (isValidDrawMap(commands[i]) == false) {
+						bGoodDrawing = false;
+						break;
+					}
+				}
+			}
+	
+			if (bGoodDrawing == true) {
+				clearAllPanels();
+				for (i = 1; i < commands.length; i += 4) {
+					if (!isNaN(commands[i])) { //Did they submit a time?
+						time = commands[i];
+						i = 2;
+						if (time < 300) { time = 300; }//Until we resolve time-collision issue, force a min of 300ms.
+					}
+					if (i < commands.length) gPBOT1PicArray.push(commands[i]);
+					if (i + 1 < commands.length) gPBOT2PicArray.push(commands[i + 1]);
+					if (i + 2 < commands.length) gPBOT3PicArray.push(commands[i + 2]);
+					if (i + 3 < commands.length) gPBOT4PicArray.push(commands[i + 3]);
+				}
+				loopAllFrames(time);//Loop forever.
+			} else {
+				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
+			}
+			break;
+		case "!pbaz":
+			var buffer = new Buffer(commands[1], 'base64');
+			zlib.unzip(buffer, function (err, buffer) {
+				if (!err) {
+					var drawCommand = "!pba." + buffer.toString();//Decoded & decompressed
+					//var drawCommand = "!pbax." + buffer.toString();//Decoded & decompressed
+					processCommands(client, user, drawCommand);
+				}
+				else {
+					console.log("ERROR UNCOMPRESSING!");
+				}
+			});
+			break;
 		case "!pb1st": //Disabled for now. Doesn't work. Should map to all bots: !pbst
 			/*var str = commands[1];//str to draw
 			var time = 300;
@@ -393,10 +585,10 @@ function processCommands(client, user, commStr){
 						if(approvedChars.test(str)){
 					clearPanel(1);
 					for(var i = 0; i < picFrames; i++){
-								pic = pbot.generateFrame(str,i);//i represents index into str col data
-								pbot.gPBOT1PicArray.push(pic);
+								pic = generateFrame(str,i);//i represents index into str col data
+								gPBOT1PicArray.push(pic);
 					}
-					loopFrames(pbot.gPBOT1PicArray,time);
+					loopFrames(gPBOT1PicArray,time);
 					}else{
 				client.action("laboratory424",user['display-name'] + ", Sorry, Bad character in text.");
 			}*/
@@ -408,6 +600,298 @@ function processCommands(client, user, commStr){
 			break;
 	}
 }
+
+	/////////////////////////////////////////////////////////////////////////////
+	//Code below is for Frame differencing animation and displaying saved pictures.
+	//Neither works at this time, so disabled and unmerged to js until we
+	//stabilize the current code base.
+	/*
+	if (commands[0] === "!pb1ax") {
+		var pic = "";
+		var time = 500;//Default
+		var i;
+		var bGoodDrawing = true;
+		var picArray = [];
+		var picDiffArray = [];
+		var pixMap;
+
+		//Let check all the data sent before we update display
+		for (i = 1; i < commands.length; i++) {
+			if (isNaN(commands[i])) {	//If time entered, skip validation.
+				if (isValidDrawMap(commands[i]) == false) {
+					bGoodDrawing = false;
+					break;
+				}
+			}
+		}
+
+		if (bGoodDrawing == true) {
+			clearPanel(1);
+			for (i = 1; i < commands.length; i++) {
+				if (!isNaN(commands[i])) { //Did they submit a time?
+					time = commands[i];
+					if (time < 300) { time = 300; }//TEMP, testing locking to 300ms
+				} else {
+					pixMap = rleToPixPanel(commands[i]); //convert to pix map
+					picArray.push(pixMap); //put into array for processing
+				}
+			}
+			//diff frames.
+			picDiffArray = diffPanelFrames(picArray);
+			//loop
+			for (j = 0; j < picDiffArray.length; j++) {
+				gPBOT1PicArray.push(picDiffArray[j]); //put into array for processing
+			}
+			loopDiffFramesPB1(time);//Loop forever.
+		}
+	} else if (commands[0] === "!pb2ax") {
+		var pic = "";
+		var time = 500;//Default
+		var i;
+		var bGoodDrawing = true;
+		var picArray = [];
+		var picDiffArray = [];
+		var pixMap;
+
+		//Let check all the data sent before we update display
+		for (i = 1; i < commands.length; i++) {
+			if (isNaN(commands[i])) {	//If time entered, skip validation.
+				if (isValidDrawMap(commands[i]) == false) {
+					bGoodDrawing = false;
+					break;
+				}
+			}
+		}
+
+		if (bGoodDrawing == true) {
+			clearPanel(2);
+			for (i = 1; i < commands.length; i++) {
+				if (!isNaN(commands[i])) { //Did they submit a time?
+					time = commands[i];
+				} else {
+					pixMap = rleToPixPanel(commands[i]); //convert to pix map
+					picArray.push(pixMap); //put into array for processing
+				}
+			}
+			//diff frames.
+			picDiffArray = diffPanelFrames(picArray);
+			//loop
+			for (j = 0; j < picDiffArray.length; j++) {
+				gPBOT2PicArray.push(picDiffArray[j]); //put into array for processing
+			}
+			loopDiffFramesPB2(time);//Loop forever.
+		}
+	} else if (commands[0] === "!pb3ax") {
+		var pic = "";
+		var time = 500;//Default
+		var i;
+		var bGoodDrawing = true;
+		var picArray = [];
+		var picDiffArray = [];
+		var pixMap;
+
+		//Let check all the data sent before we update display
+		for (i = 1; i < commands.length; i++) {
+			if (isNaN(commands[i])) {	//If time entered, skip validation.
+				if (isValidDrawMap(commands[i]) == false) {
+					bGoodDrawing = false;
+					break;
+				}
+			}
+		}
+
+		if (bGoodDrawing == true) {
+			clearPanel(3);
+			for (i = 1; i < commands.length; i++) {
+				if (!isNaN(commands[i])) { //Did they submit a time?
+					time = commands[i];
+				} else {
+					pixMap = rleToPixPanel(commands[i]); //convert to pix map
+					picArray.push(pixMap); //put into array for processing
+				}
+			}
+			//diff frames.
+			picDiffArray = diffPanelFrames(picArray);
+			//loop
+			for (j = 0; j < picDiffArray.length; j++) {
+				gPBOT3PicArray.push(picDiffArray[j]); //put into array for processing
+			}
+			loopDiffFramesPB3(time);//Loop forever.
+		}
+	} else if (commands[0] === "!pb4ax") {
+		var pic = "";
+		var time = 500;//Default
+		var i;
+		var bGoodDrawing = true;
+		var picArray = [];
+		var picDiffArray = [];
+		var pixMap;
+
+		//Let check all the data sent before we update display
+		for (i = 1; i < commands.length; i++) {
+			if (isNaN(commands[i])) {	//If time entered, skip validation.
+				if (isValidDrawMap(commands[i]) == false) {
+					bGoodDrawing = false;
+					break;
+				}
+			}
+		}
+
+		if (bGoodDrawing == true) {
+			clearPanel(4);//restore if flag doesn't work below.
+			//gClearPB4 = true;//Set flag to purge previous animation.
+			for (i = 1; i < commands.length; i++) {
+				if (!isNaN(commands[i])) { //Did they submit a time?
+					time = commands[i];
+				} else {
+					pixMap = rleToPixPanel(commands[i]); //convert to pix map
+					picArray.push(pixMap); //put into array for processing
+				}
+			}
+			//diff frames.
+			picDiffArray = diffPanelFrames(picArray);
+			//loop
+			for (j = 0; j < picDiffArray.length; j++) {
+				gPBOT4PicArray.push(picDiffArray[j]); //put into array for processing
+			}
+			loopDiffFramesPB4(time);//Loop forever.
+		}
+	} else if (commands[0] === "!pbax") {
+		var pic = "";
+		var time = 500;//Default
+		var i;
+		var panels;
+		var bGoodDrawing = true;
+		var picArray1 = [];
+		var picArray2 = [];
+		var picArray3 = [];
+		var picArray4 = [];
+		var picDiffArray1 = [];
+		var picDiffArray2 = [];
+		var picDiffArray3 = [];
+		var picDiffArray4 = [];
+		var pixMap;
+
+		//Let check all the data sent before we update display
+		for (i = 1; i < commands.length; i++) {
+			if (isNaN(commands[i])) {	//If time entered, skip validation.
+				if (isValidDrawMap(commands[i]) == false) {
+					bGoodDrawing = false;
+					break;
+				}
+			}
+		}
+
+		if (bGoodDrawing == true) {
+			clearAllPanels();
+			for (i = 1; i < commands.length; i += 4) {
+				if (!isNaN(commands[i])) { //Did they submit a time?
+					time = commands[i];
+					//if (time < 300) { time = 300; }//Temp, testing.
+					i = 2;
+				}
+
+				if (i < commands.length) {
+					pixMap = rleToPixPanel(commands[i]); //convert to pix map
+					picArray1.push(pixMap);
+				}
+				if (i + 1 < commands.length) {
+					pixMap = rleToPixPanel(commands[i + 1]); //convert to pix map
+					picArray2.push(pixMap);
+				}
+				if (i + 2 < commands.length) {
+					pixMap = rleToPixPanel(commands[i + 2]); //convert to pix map
+					picArray3.push(pixMap);
+				}
+				if (i + 3 < commands.length) {
+					pixMap = rleToPixPanel(commands[i + 3]); //convert to pix map
+					picArray4.push(pixMap);
+				}
+			}
+			//diff frames.
+			picDiffArray1 = diffPanelFrames(picArray1);
+			picDiffArray2 = diffPanelFrames(picArray2);
+			picDiffArray3 = diffPanelFrames(picArray3);
+			picDiffArray4 = diffPanelFrames(picArray4);
+			//loop
+			for (j = 0; j < picDiffArray1.length; j++) {
+				gPBOT1PicArray.push(picDiffArray1[j]); //put into array for processing
+				gPBOT2PicArray.push(picDiffArray2[j]); //put into array for processing
+				gPBOT3PicArray.push(picDiffArray3[j]); //put into array for processing
+				gPBOT4PicArray.push(picDiffArray4[j]); //put into array for processing
+			}
+			loopAllDiffFrames(time);//Loop forever.
+		} else {
+			client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
+		}
+	} else if (commands[0] === "!pb1f") { //draw saved drawing to panel.
+		//Proto: To pull a saved drawing and display. Includes a credit to artist.
+		var fileName = commands[1];
+		var fileStr = "";
+
+		fileStr = getSavedDrawing(fileName);
+		if (fileStr !== '') {
+			var strs = fileStr.split(".", 2);//0 is string, 1 is credit
+			console.log("str: " + strs[0]);
+			console.log("credit:" + strs[1]);
+			clearPanel(1);
+			setTimeout(function () { drawPicture(strs[0], 1); show(1); }, 500);
+			client.action("laboratory424", "  CREDIT: " + fileName + " on PixelBot1 is by " + strs[1]);
+		} else {
+			client.action("laboratory424", user['display-name'] + ", Sorry, there isn't a saved drawing with that name.");
+		}
+	} else if (commands[0] === "!pb2f") { //draw saved drawing to panel.
+		var fileName = commands[1];
+		var fileStr = "";
+
+		fileStr = getSavedDrawing(fileName);
+		if (fileStr !== '') {
+			var strs = fileStr.split(".", 2);//0 is string, 1 is credit
+			console.log("str: " + strs[0]);
+			console.log("credit:" + strs[1]);
+			clearPanel(2);
+			setTimeout(function () { drawPicture(strs[0], 2); show(2); }, 500);
+			client.action("laboratory424", "  CREDIT: " + fileName + " on PixelBot2 is by " + strs[1]);
+		} else {
+			client.action("laboratory424", user['display-name'] + ", Sorry, there isn't a saved drawing with that name.");
+		}
+	} else if (commands[0] === "!pb3f") { //draw saved drawing to panel.
+		var fileName = commands[1];
+		var fileStr = "";
+
+		fileStr = getSavedDrawing(fileName);
+		if (fileStr !== '') {
+			var strs = fileStr.split(".", 2);//0 is string, 1 is credit
+			console.log("str: " + strs[0]);
+			console.log("credit:" + strs[1]);
+			clearPanel(3);
+			setTimeout(function () { drawPicture(strs[0], 3); show(3); }, 500);
+			client.action("laboratory424", "  CREDIT: " + fileName + " on PixelBot3 is by " + strs[1]);
+		} else {
+			client.action("laboratory424", user['display-name'] + ", Sorry, there isn't a saved drawing with that name.");
+		}
+	} else if (commands[0] === "!pb4f") { //draw saved drawing to panel.
+		var fileName = commands[1];
+		var fileStr = "";
+
+		fileStr = getSavedDrawing(fileName);
+		if (fileStr !== '') {
+			var strs = fileStr.split(".", 2);//0 is string, 1 is credit
+			console.log("str: " + strs[0]);
+			console.log("credit:" + strs[1]);
+			clearPanel(4);
+			setTimeout(function () { drawPicture(strs[0], 4); show(4); }, 500);
+			client.action("laboratory424", "  CREDIT: " + fileName + " on PixelBot4 is by " + strs[1]);
+		} else {
+			client.action("laboratory424", user['display-name'] + ", Sorry, there isn't a saved drawing with that name.");
+		}
+	} else if (commands[0] === "!bs") {
+		//Game to try once pbot code cleaned up.
+		//pbs.chatIn(user, message);
+	}
+	*/
+
+
 /////////////////////////////////////////////////
 function generateFrame(str,startCol){
 	var strData = [];
@@ -424,7 +908,7 @@ function generateFrame(str,startCol){
 
 	startCol = Number(startCol); //offset into str col data
 
-	strData = this.getStrBinary(str);
+	strData = getStrBinary(str);
 	strDataLen = strData.length;
 
 	for(charCol = 0; charCol < strDataLen; charCol++){
@@ -482,7 +966,7 @@ function setPix(pix, pixColorComm){
   	  var bRequestOK = true;
 
   	  if(pix !== null){
-  		  pix.color(this.getPictureColor(pixColorComm));
+  		  pix.color(getPictureColor(pixColorComm));
   	  }
 
   	  return bRequestOK;
@@ -502,7 +986,7 @@ function setPix(pix, pixColorComm){
 		  curPix = (r*12)-11+(c-1);
 	  }
 	  if(curPix > 0 && curPix <= 144){
-		  pix = this.strip.pixel(curPix-1);
+		  pix = strip.pixel(curPix-1);
 		  if(pix !== null){
 		  	pix.color(hexColor);
 			bRequestOK = true;
@@ -597,10 +1081,10 @@ function setCol (col, color, strip){
 
 		if(!isNaN (pixArr[j]) && pixArr[j] >= 1 && pixArr[j] <= 144){
 		    if (blinkState[curPix] == false){
-				this.setPix(strip.pixel(curPix), curColor);
+				setPix(strip.pixel(curPix), curColor);
 		    	blinkState[curPix] = true;
 		    }else{
-				this.setPix(strip.pixel(curPix), "x");
+				setPix(strip.pixel(curPix), "x");
 		    	blinkState[curPix] = false;
 		    }
 		}
@@ -911,7 +1395,7 @@ function getHexColor(pixColorComm){
 
   	  for (var i = 0; i < commandStrLen; i++) {
   		if(isNaN(colorStr.charAt(i)) && colorStr.charAt(i) !=' '){
-  			  curColor = this.getPictureColor(colorStr.charAt(i));
+  			  curColor = getPictureColor(colorStr.charAt(i));
   			  pix = strip.pixel(curPix);
   			  pix.color(curColor);
   			  curPix++;
@@ -1036,7 +1520,7 @@ function getHexColor(pixColorComm){
 		//console.log("COLORS: " + colors);
   		//Load Array data
   		for(var i = 1; i < pixels.length; i++){
-				this.setPix2(strip.pixel(pixels[i]), colors[i-1]);
+				setPix2(strip.pixel(pixels[i]), colors[i-1]);
   		}
 		}
 
@@ -1129,31 +1613,31 @@ function loopFramesPB1(time) {
 
 function loopFramesPB2(time) {
 	var i = 0;
-	pbot.gPBOT2IntervalPtr = setInterval(function () {
-		if (i == pbot.gPBOT2PicArray.length) {i = 0;}
-		pbot.drawPicture(pbot.gPBOT2PicArray[i], 2);
+	gPBOT2IntervalPtr = setInterval(function () {
+		if (i == gPBOT2PicArray.length) {i = 0;}
+		drawPicture(gPBOT2PicArray[i], 2);
 		i++;
-		pbot.pbotHW.pbot2Strip.show();
+		pbotHW.pbot2Strip.show();
 	}, time);
 }
 
 function loopFramesPB3(time) {
 	var i = 0;
-	pbot.gPBOT3IntervalPtr = setInterval(function () {
-		if (i == pbot.gPBOT3PicArray.length) {i = 0;}
-		pbot.drawPicture(pbot.gPBOT3PicArray[i], 3);
+	gPBOT3IntervalPtr = setInterval(function () {
+		if (i == gPBOT3PicArray.length) {i = 0;}
+		drawPicture(gPBOT3PicArray[i], 3);
 		i++;
-		pbot.pbotHW.pbot3Strip.show();
+		pbotHW.pbot3Strip.show();
 	}, time);
 }
 
 function loopFramesPB4(time) {
 	var i = 0;
-	pbot.gPBOT4IntervalPtr = setInterval(function () {
-		if (i == pbot.gPBOT4PicArray.length) {i = 0;}
-		pbot.drawPicture(pbot.gPBOT4PicArray[i], 4);
+	gPBOT4IntervalPtr = setInterval(function () {
+		if (i == gPBOT4PicArray.length) {i = 0;}
+		drawPicture(gPBOT4PicArray[i], 4);
 		i++;
-		pbot.pbotHW.pbot4Strip.show();
+		pbotHW.pbot4Strip.show();
 	}, time);
 }
 //For now, using pbot4 ptr and array to set it up. Need to change after testing though.
@@ -1244,26 +1728,26 @@ function animateAllPanelPix(pix, color, time, strip) {
 function clearPanel(pBotNum){
 	switch (pBotNum) {
 		case 1:
-			if (this.gPBOT1IntervalPtr != null) { clearInterval(this.gPBOT1IntervalPtr); }
-			this.gPBOT1PicArray = [];//Purge array
+			if (gPBOT1IntervalPtr != null) { clearInterval(gPBOT1IntervalPtr); }
+			gPBOT1PicArray = [];//Purge array
 			pbotHW.pbot1Strip.color("#000000");
 			setTimeout(function () { pbotHW.pbot1Strip.color("#000000") }, 100);//Necessary to make sure interval clears first. LAME!
 			break;
 		case 2:
-			if (this.gPBOT2IntervalPtr != null) { clearInterval(this.gPBOT2IntervalPtr); }
-			this.gPBOT2PicArray = [];//Purge array
+			if (gPBOT2IntervalPtr != null) { clearInterval(gPBOT2IntervalPtr); }
+			gPBOT2PicArray = [];//Purge array
 			pbotHW.pbot2Strip.color("#000000");
 			setTimeout(function () { pbotHW.pbot2Strip.color("#000000") }, 100);//Necessary to make sure interval clears first. LAME!
 			break;
 		case 3:
-			if (this.gPBOT3IntervalPtr != null) { clearInterval(this.gPBOT3IntervalPtr); }
-			this.gPBOT3PicArray = [];//Purge array
+			if (gPBOT3IntervalPtr != null) { clearInterval(gPBOT3IntervalPtr); }
+			gPBOT3PicArray = [];//Purge array
 			pbotHW.pbot3Strip.color("#000000");
 			setTimeout(function () { pbotHW.pbot3Strip.color("#000000") }, 100);//Necessary to make sure interval clears first. LAME!
 			break;
 		case 4:
-			if (this.gPBOT4IntervalPtr != null) { clearInterval(this.gPBOT4IntervalPtr); }
-			this.gPBOT4PicArray = [];//Purge array
+			if (gPBOT4IntervalPtr != null) { clearInterval(gPBOT4IntervalPtr); }
+			gPBOT4PicArray = [];//Purge array
 			pbotHW.pbot4Strip.color("#000000");
 			setTimeout(function () { pbotHW.pbot4Strip.color("#000000") }, 100);//Necessary to make sure interval clears first. LAME!
 			gClearPB4 = false;//reset clear flag
@@ -1275,23 +1759,23 @@ function clearPanel(pBotNum){
 function clearAllPanels(){
 	//if (gPBOTAllIntervalPtr != null) { clearInterval(gPBOTAllIntervalPtr); }
 	//PB1
-	if (this.gPBOT1IntervalPtr != null) { clearInterval(this.gPBOT1IntervalPtr); }
-	this.gPBOT1PicArray = [];//Purge array
+	if (gPBOT1IntervalPtr != null) { clearInterval(gPBOT1IntervalPtr); }
+	gPBOT1PicArray = [];//Purge array
 	pbotHW.pbot1Strip.color("#000000");
 	setTimeout(function () { pbotHW.pbot1Strip.color("#000000") }, 100);//Necessary to make sure interval clears first. LAME!
 	//PB2
-	if (this.gPBOT2IntervalPtr != null) { clearInterval(this.gPBOT2IntervalPtr); }
-	this.gPBOT2PicArray = [];//Purge array
+	if (gPBOT2IntervalPtr != null) { clearInterval(gPBOT2IntervalPtr); }
+	gPBOT2PicArray = [];//Purge array
 	pbotHW.pbot2Strip.color("#000000");
 	setTimeout(function () { pbotHW.pbot2Strip.color("#000000") }, 100);//Necessary to make sure interval clears first. LAME!
 	//PB3
-	if (this.gPBOT3IntervalPtr != null) { clearInterval(this.gPBOT3IntervalPtr); }
-	this.gPBOT3PicArray = [];//Purge array
+	if (gPBOT3IntervalPtr != null) { clearInterval(gPBOT3IntervalPtr); }
+	gPBOT3PicArray = [];//Purge array
 	pbotHW.pbot3Strip.color("#000000");
 	setTimeout(function () { pbotHW.pbot3Strip.color("#000000") }, 100);//Necessary to make sure interval clears first. LAME!
 	//PB4
-	if (this.gPBOT4IntervalPtr != null) { clearInterval(this.gPBOT4IntervalPtr); }
-	this.gPBOT4PicArray = [];//Purge array
+	if (gPBOT4IntervalPtr != null) { clearInterval(gPBOT4IntervalPtr); }
+	gPBOT4PicArray = [];//Purge array
 	pbotHW.pbot4Strip.color("#000000");
 	setTimeout(function () { pbotHW.pbot4Strip.color("#000000") }, 100);//Necessary to make sure interval clears first. LAME!
 }
@@ -1352,48 +1836,5 @@ function testAnimation() {
 }
 
 ////////////////////////////////////////////
-module.exports.pbotHW = pbotHW;
-module.exports.gPBOT1PicArray = gPBOT1PicArray;
-module.exports.gPBOT1IntervalPtr = gPBOT1IntervalPtr;
-module.exports.gPBOT2PicArray = gPBOT2PicArray;
-module.exports.gPBOT2IntervalPtr = gPBOT2IntervalPtr;
-module.exports.gPBOT3PicArray = gPBOT3PicArray;
-module.exports.gPBOT3IntervalPtr = gPBOT3IntervalPtr;
-module.exports.gPBOT4PicArray = gPBOT4PicArray;
-module.exports.gPBOT4IntervalPtr = gPBOT4IntervalPtr;
-
-//module.exports.setStrip = setStrip;
-//module.exports. = getStrip;
-//module.exports.init = init;
 module.exports.processCommands = processCommands;
-module.exports.generateFrame = generateFrame;
-//module.exports.setPix = setPix;
-//module.exports.setPix2 = setPix2;
-module.exports.set_RCPixel = set_RCPixel;
-module.exports.say_text = say_text;
-//module.exports.setRow = setRow;
-//module.exports.setCol = setCol;
-module.exports.getHexColor = getHexColor;
-module.exports.getPictureColor = getPictureColor;
-module.exports.drawPicture = drawPicture;
-module.exports.drawPictureOLD = drawPictureOLD;
-module.exports.show = show;
-module.exports.rleToPixPanel = rleToPixPanel;
 
-module.exports.diffFrames = diffFrames;
-module.exports.diffPanelFrames = diffPanelFrames;
-module.exports.drawDiffFrame = drawDiffFrame;
-module.exports.loopDiffFramesPB1 = loopDiffFramesPB1;
-module.exports.loopDiffFramesPB2 = loopDiffFramesPB2;
-module.exports.loopDiffFramesPB3 = loopDiffFramesPB3;
-module.exports.loopDiffFramesPB4 = loopDiffFramesPB4;
-
-module.exports.isValidDrawMap = isValidDrawMap;
-module.exports.clearPanel = clearPanel;
-module.exports.clearAllPanels = clearAllPanels;
-module.exports.getSavedDrawing = getSavedDrawing;
-
-module.exports.loopFramesPB1 = loopFramesPB1;
-module.exports.loopAllFrames = loopAllFrames;
-module.exports.animatePix = animatePix;
-module.exports.animateAllPanelPix = animateAllPanelPix;
