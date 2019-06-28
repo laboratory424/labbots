@@ -5,7 +5,8 @@
 //to cause scope issues.
 
 //Certain functionality should be pushed into draw folder/file.
-
+var fs = require("fs");
+var zlib = require("zlib");
 var pixel = require("node-pixel");
 var five = require("johnny-five");
 var ports = [
@@ -564,7 +565,7 @@ function processCommands(client, user, commStr){
 				if (!err) {
 					var drawCommand = "!pba." + buffer.toString();//Decoded & decompressed
 					//var drawCommand = "!pbax." + buffer.toString();//Decoded & decompressed
-					processCommand(user, drawCommand);
+					processCommands(client, user, drawCommand);
 				}
 				else {
 					console.log("ERROR UNCOMPRESSING!");
@@ -1836,6 +1837,4 @@ function testAnimation() {
 
 ////////////////////////////////////////////
 module.exports.processCommands = processCommands;
-//module.exports.clearPanel = clearPanel;
-////module.exports.show = show;
-//module.exports.drawPicture = drawPicture;
+
