@@ -68,13 +68,13 @@ client.on("subscription", (channel, username, method, message, userstate) => {
 	var comm;
 
 	comm = "!pb1d."+ pic;
-	pbot.processCommands(client,user,comm);
+	pbot.processCommands(client,username,comm);
 	comm = "!pb2d."+pic;
-	pbot.processCommands(client,user,comm);
+	pbot.processCommands(client,username,comm);
 	comm = "!pb3d."+pic;
-	pbot.processCommands(client,user,comm);
+	pbot.processCommands(client,username,comm);
 	comm = "!pb4d."+pic;
-	pbot.processCommands(client,user,comm);
+	pbot.processCommands(client,username,comm);
 
 	//BBs
 	fbot.throwbbs();
@@ -91,13 +91,13 @@ client.on("resub", (channel, username, months, message, userstate, methods) => {
 	var comm;
 
 	comm = "!pb1d."+ pic;
-	pbot.processCommands(client,user,comm);
+	pbot.processCommands(client,username,comm);
 	comm = "!pb2d."+pic;
-	pbot.processCommands(client,user,comm);
+	pbot.processCommands(client,username,comm);
 	comm = "!pb3d."+pic;
-	pbot.processCommands(client,user,comm);
+	pbot.processCommands(client,username,comm);
 	comm = "!pb4d."+pic;
-	pbot.processCommands(client,user,comm);
+	pbot.processCommands(client,username,comm);
 
 	//BBs
 	fbot.throwbbs();
@@ -113,13 +113,13 @@ client.on("subgift", (channel, username, streakMonths, recipient, methods, users
 	var comm;
 
 	comm = "!pb1d."+ pic;
-	pbot.processCommands(client,user,comm);
+	pbot.processCommands(client,username,comm);
 	comm = "!pb2d."+pic;
-	pbot.processCommands(client,user,comm);
+	pbot.processCommands(client,username,comm);
 	comm = "!pb3d."+pic;
-	pbot.processCommands(client,user,comm);
+	pbot.processCommands(client,username,comm);
 	comm = "!pb4d."+pic;
-	pbot.processCommands(client,user,comm);
+	pbot.processCommands(client,username,comm);
 
 	//BBs
 	fbot.throwbbs();
@@ -134,13 +134,13 @@ client.on("giftpaidupgrade", (channel, username, sender, userstate) => {
 	var comm;
 
 	comm = "!pb1d."+ pic;
-	pbot.processCommands(client,user,comm);
+	pbot.processCommands(client,username,comm);
 	comm = "!pb2d."+pic;
-	pbot.processCommands(client,user,comm);
+	pbot.processCommands(client,username,comm);
 	comm = "!pb3d."+pic;
-	pbot.processCommands(client,user,comm);
+	pbot.processCommands(client,username,comm);
 	comm = "!pb4d."+pic;
-	pbot.processCommands(client,user,comm);
+	pbot.processCommands(client,username,comm);
 
 	//BBs
 	fbot.throwbbs();
@@ -155,13 +155,13 @@ client.on("anongiftpaidupgrade", (channel, username, userstate) => {
 	var comm;
 
 	comm = "!pb1d."+ pic;
-	pbot.processCommands(client,user,comm);
+	pbot.processCommands(client,username,comm);
 	comm = "!pb2d."+pic;
-	pbot.processCommands(client,user,comm);
+	pbot.processCommands(client,username,comm);
 	comm = "!pb3d."+pic;
-	pbot.processCommands(client,user,comm);
+	pbot.processCommands(client,username,comm);
 	comm = "!pb4d."+pic;
-	pbot.processCommands(client,user,comm);
+	pbot.processCommands(client,username,comm);
 
 	//BBs
 	fbot.throwbbs();
