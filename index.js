@@ -37,7 +37,7 @@ var options = {
 
 var client = new tmi.client(options);
 client.connect();
-fbot.setTMIClient(client);//testing, pass off client to fbot so can talk.
+fbot.setTMIClient(client);//testing, pass off client to 	 so can talk.
 
 //////////////////////////////////////////
 client.on('connected', function (address, port) {
@@ -178,7 +178,7 @@ client.on("cheer", (channel, userstate, message) => {
 	var bits = Number(userstate.bits);
 	var fireStr = "fire";
 	
-	if (bits >= 10 && bits < 20) {
+	if (bits >= 5 && bits < 20) {
 		fbot.throwbbs();
 		client.action("laboratory424", userstate['display-name'] + ", BBs deployed to make a mess for Jeff to clean!");
 	} else {
@@ -271,7 +271,7 @@ function processUser(user, message) {
 		fbot.throwbbs();
 		bProcessed = true;
 	}else if(cfg.adminUsr.includes(user.username) && message.includes("doit")){
-		//fbot.throwbbs();
+		fbot.throwbbs();
 		var pic = "1e3s3e3s4e1s2f1s1e1s2f1s3e1s2f1s2f1s6e1s5f1s5e1s3f1s7e1s5f1s3e1s2f1s1f1s2f1s3e1s3f1s1f1s3f4s5f3s5e1s3f1s7e1s1f1s11e1s5e";
 		var comm;
 
@@ -283,7 +283,7 @@ function processUser(user, message) {
 		pbot.processCommands(client,user,comm);
 		comm = "!pb4d."+pic;
 		pbot.processCommands(client,user,comm);
-		//fbot.addToQue(client, user, "fire2", true);
+		fbot.addToQue(client, user, "fire2", true);
 		bProcessed = true;
 	}
 
@@ -336,6 +336,7 @@ function processCommand(user, message) {
 		case "!pb3d":
 		case "!pb4d":
 		case "!pbd":
+		case "!pbdt":
 		case "!pbdz":
 		case "!pb1x"://Clear panel(s)
 		case "!pb2x":
@@ -348,6 +349,9 @@ function processCommand(user, message) {
 		case "!pb4a":
 		case "!pba":
 		case "!pbaz":
+		case "!pbg":
+		case "!pbgx"://TEMP! Clears game mode.
+		case "!ttt"://TEMP! This is unfortunate, but good enough for now.
 			pbot.processCommands(client, user, commStr);
 			break;
 	}
