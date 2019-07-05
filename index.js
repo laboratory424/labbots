@@ -8,7 +8,7 @@ var zlib = require("zlib");
 var pbot = require('./pbot/pbot.js');
 var fbot = require('./fbot/fbot.js');
 var ebot = require('./ebot/ebot.js');
-var xbot = require('./xbot/xbot.js'); //DEV ONLY
+//var xbot = require('./xbot/xbot.js'); //DEV ONLY
 
 //CONNECT TO IRC
 var tmi = require("tmi.js");
@@ -319,7 +319,7 @@ function processCommand(user, message) {
 		case "!xb1p":
 		case "!xb1i":
 		case "!xb1x":
-			xbot.processCommands(commStr);
+			//xbot.processCommands(commStr);
 			break;
 		case "!pb1":
 		case "!pb1r":

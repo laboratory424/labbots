@@ -153,9 +153,9 @@ function processCommands(client, user, commStr){
 	//Game mode, map to active game or reset
 	if(gameMode !=  ''){
 		if (commands[0] == "!pbgx"){
-			//console.log("IN PBGX: ");
-			gameMode =  ''; //clear game
-			commands[0] = "!pbx";//TEMP, should be a game over screen handled by game.
+			game_ttt.endGame();//temp, since we only have one game. Should use gameMode.
+			//gameMode =  ''; //clear game
+			//commands[0] = "!pbx";//TEMP, should be a game over screen handled by game.
 		}else{
 			commands[0] = "!pbg."+gameMode;
 		}
@@ -677,7 +677,7 @@ function processCommands(client, user, commStr){
 					//Set game mode to route messages
 					if (gameMode == ""){
 						gameMode = 'ttt';
-						game_ttt.init();
+						game_ttt.init(client);
 					}else if(commands[2] != null){
 						game_ttt.ProcessCommand(commands[2]);
 					}
@@ -709,6 +709,14 @@ function gameCommand(commStr){
 			setTimeout(function () { drawPicTrans(commands[2], 2); show(2); }, 500);
 			setTimeout(function () { drawPicTrans(commands[3], 3); show(3); }, 500);
 			setTimeout(function () { drawPicTrans(commands[4], 4); show(4); }, 500);
+			break;
+		case "end":
+			gameMode =  ''; //clear game
+			clearAllPanels();
+			setTimeout(function () { show(1); }, 500);
+			setTimeout(function () { show(2); }, 500);
+			setTimeout(function () { show(3); }, 500);
+			setTimeout(function () { show(4); }, 500);
 			break;
 	}
 }
