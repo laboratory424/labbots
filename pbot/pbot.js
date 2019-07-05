@@ -9,6 +9,10 @@ var fs = require("fs");
 var zlib = require("zlib");
 var pixel = require("node-pixel");
 var five = require("johnny-five");
+//Games
+var game_ttt = require("./games/ttt.js");
+var gameMode = "";
+
 var ports = [
 	{ id: "PBOT1", port: "COM6" },
 	{ id: "PBOT3", port: "COM8" },
@@ -145,6 +149,19 @@ function processCommands(client, user, commStr){
 	var time = 1000;
 	var commands = commStr.split(".", 145);
 	var pixelColor;
+
+	//Game mode, map to active game or reset
+	if(gameMode !=  ''){
+		if (commands[0] == "!pbgx"){
+			game_ttt.endGame();//temp, since we only have one game. Should use gameMode.
+			//gameMode =  ''; //clear game
+			//commands[0] = "!pbx";//TEMP, should be a game over screen handled by game.
+		}else{
+			commands[0] = "!pbg."+gameMode;
+		}
+		commStr = commands.slice().join(".");
+		commands = commStr.split(".", 3);
+	}
 
 	switch(commands[0]){
 		case "!pb1":
@@ -396,6 +413,58 @@ function processCommands(client, user, commStr){
 				});
 			}
 			break;
+		case "!pbdt":
+			var bDrawPB1 = false;
+			var bDrawPB2 = false;
+			var bDrawPB3 = false;
+			var bDrawPB4 = false;
+	
+			var commLen = commands.length;
+			//PB1
+			if (commLen - 1 >= 1 && commands[1] !== '') {
+				if (isValidDrawMap(commands[1]) == false) {
+					client.action("laboratory424", user['display-name'] + ", Sorry, PBOT1 cannot draw this. Bad syntax in drawing.");
+				} else {
+					bDrawPB1 = true;
+				}
+			}
+			//PB2
+			if (commLen - 1 >= 2 && commands[2] !== '') {
+				if (isValidDrawMap(commands[2]) == false) {
+					client.action("laboratory424", user['display-name'] + ", Sorry, PBOT2 cannot draw this. Bad syntax in drawing.");
+				} else {
+					bDrawPB2 = true;
+				}
+			}
+			//PB3
+			if (commLen - 1 >= 3 && commands[3] !== '') {
+				if (isValidDrawMap(commands[3]) == false) {
+					client.action("laboratory424", user['display-name'] + ", Sorry, PBOT3 cannot draw this. Bad syntax in drawing.");
+				} else {
+					bDrawPB3 = true;
+				}
+			}
+			//PB4
+			if (commLen - 1 >= 4 && commands[4] !== '') {
+				if (isValidDrawMap(commands[4]) == false) {
+					client.action("laboratory424", user['display-name'] + ", Sorry, PBOT4 cannot draw this. Bad syntax in drawing.");
+				} else {
+					bDrawPB4 = true;
+				}
+			}
+			if (bDrawPB1) {
+				setTimeout(function () { drawPicTrans(commands[1], 1); show(1); }, 500);
+			}
+			if (bDrawPB2) {
+				setTimeout(function () { drawPicTrans(commands[2], 2); show(2); }, 500);
+			}
+			if (bDrawPB3) {
+				setTimeout(function () { drawPicTrans(commands[3], 3); show(3); }, 500);
+			}
+			if (bDrawPB4) {
+				setTimeout(function () { drawPicTrans(commands[4], 4); show(4); }, 500);
+			}
+			break;
 		case "!pb1a":
 			var pic = "";
 			var time = 500;//Default
@@ -597,6 +666,57 @@ function processCommands(client, user, commStr){
 		case "!pbw"://TBD: Write and append long animations/pics to server.
 			break;
 		case "!pbr"://TBD: Read saved long animations/pics from server.
+			break;
+		case "!pbg":
+			switch(commands[1]){
+				case "pbs": //Pixel Battleship
+					//console.log("PIXEL BATTLESHIP: ");
+					//pbs.chatIn(user, "!bs.play");//TBD: pass in client?
+					break;
+				case "ttt": //TicTacToe
+					//Set game mode to route messages
+					if (gameMode == ""){
+						gameMode = 'ttt';
+						game_ttt.init(client);
+					}else if(commands[2] != null){
+						game_ttt.ProcessCommand(commands[2]);
+					}
+					break;
+			}
+			break;
+	}
+}
+////////////////////////////////////////////////////////////
+//Game messaging function
+function gameCommand(commStr){
+	//var bProcessed = false;
+	var command;
+	var i;
+	//var time = 1000;
+	var commands = commStr.split(".", 145);
+	//var pixelColor;
+
+	switch(commands[0]){
+		case "draw": //Draw to entire pbot, clears previous panel
+			clearAllPanels();
+			setTimeout(function () { drawPicture(commands[1], 1); show(1); }, 500);
+			setTimeout(function () { drawPicture(commands[2], 2); show(2); }, 500);
+			setTimeout(function () { drawPicture(commands[3], 3); show(3); }, 500);
+			setTimeout(function () { drawPicture(commands[4], 4); show(4); }, 500);
+			break;
+		case "drawt": //Draw to entire pbot, clears previous panel
+			setTimeout(function () { drawPicTrans(commands[1], 1); show(1); }, 500);
+			setTimeout(function () { drawPicTrans(commands[2], 2); show(2); }, 500);
+			setTimeout(function () { drawPicTrans(commands[3], 3); show(3); }, 500);
+			setTimeout(function () { drawPicTrans(commands[4], 4); show(4); }, 500);
+			break;
+		case "end":
+			gameMode =  ''; //clear game
+			clearAllPanels();
+			setTimeout(function () { show(1); }, 500);
+			setTimeout(function () { show(2); }, 500);
+			setTimeout(function () { show(3); }, 500);
+			setTimeout(function () { show(4); }, 500);
 			break;
 	}
 }
@@ -1323,10 +1443,10 @@ function getHexColor(pixColorComm){
   	  	case "w"://light salmon,bright
   			hexColor = "#ffa07a";
   			break;
-				case "x"://Gray1 (gary)
+		case "x"://Gray1 (gary)
   			hexColor = "#858d86";
   			break;
-				case "y"://Gray2 (gary)
+		case "y"://Gray2 (gary)
   			hexColor = "#4c504d";
   			break;
   		default:
@@ -1375,6 +1495,46 @@ function getHexColor(pixColorComm){
   		}
   	  }
 	}
+//////////////////////////////////////////////
+//Interprets black as transparent to layer images.
+//Later, this should be a chroma color so black can be used in drawing.
+	function drawPicTrans(colorStr, pBotID){
+		var strip = getStrip(pBotID);
+		//var curChar;
+		var curColor;
+		var pix;
+		//var commandStrLen;
+		var curPix = 0;
+		var numPixels;
+		var pixNumMap;
+		var colorMap;
+
+		//Protect against empty command call.
+		if(colorStr === undefined){
+			return;//do nothing, run away.
+		}
+
+		pixNumMap = colorStr.split(/[a-z]+/);//Should break right after before the first number
+		colorMap = colorStr.split(/[0-9]+/);
+
+		pixNumArrLen = pixNumMap.length;
+		for(var i = 0; i < pixNumArrLen-1; i++) {
+			numPixels = pixNumMap[i];
+			if(numPixels > 144-curPix){
+				break;//stop drawing.
+			}
+			curColor = getPictureColor(colorMap[i+1]);
+			for(var j = 0; j < numPixels; j++){
+				if(curColor != "#000000"){ //TEMP, if black do not update pixel
+					pix = strip.pixel(curPix);
+					pix.color(curColor);
+				}
+				curPix++;
+				if(curPix > 143)break;
+			}
+		}
+	}
+
   //////////////////////////////////////////////
 	//Use 1 char for a color, no pix info, in order from 1-144
 	//Obsolete for pictures/animations, but may be useful for
@@ -1837,4 +1997,4 @@ function testAnimation() {
 
 ////////////////////////////////////////////
 module.exports.processCommands = processCommands;
-
+module.exports.gameCommand = gameCommand;
