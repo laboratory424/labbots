@@ -142,7 +142,7 @@ function init(pBotID){
 	}
 }
 /////////////////////////////////////////////////
-function processCommands(client, user, commStr){
+function processCommands(channel, client, user, commStr){
 	var bProcessed = false;
 	var command;
 	var i;
@@ -308,7 +308,7 @@ function processCommands(client, user, commStr){
 				clearPanel(1);
 				setTimeout(function () { drawPicture(colors, 1); show(1); }, 500);
 			} else {
-				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT1 cannot draw this. Bad syntax in drawing.");
+				client.action(channel, user['display-name'] + ", Sorry, PBOT1 cannot draw this. Bad syntax in drawing.");
 			}
 			break;
 		case "!pb2d":
@@ -318,7 +318,7 @@ function processCommands(client, user, commStr){
 				clearPanel(2);
 				setTimeout(function () { drawPicture(colors, 2); show(2); }, 500);
 			} else {
-				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT2 cannot draw this. Bad syntax in drawing.");
+				client.action(channel, user['display-name'] + ", Sorry, PBOT2 cannot draw this. Bad syntax in drawing.");
 			}
 			break;
 		case "!pb3d":
@@ -328,7 +328,7 @@ function processCommands(client, user, commStr){
 				clearPanel(3);
 				setTimeout(function () { drawPicture(colors, 3); show(3); }, 500);
 			} else {
-				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT3 cannot draw this. Bad syntax in drawing.");
+				client.action(channel, user['display-name'] + ", Sorry, PBOT3 cannot draw this. Bad syntax in drawing.");
 			}
 			break;
 		case "!pb4d":
@@ -338,7 +338,7 @@ function processCommands(client, user, commStr){
 				clearPanel(4);
 				setTimeout(function () { drawPicture(colors, 4); show(4); }, 500);
 			} else {
-				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT4 cannot draw this. Bad syntax in drawing.");
+				client.action(channel, user['display-name'] + ", Sorry, PBOT4 cannot draw this. Bad syntax in drawing.");
 			}
 			break;
 		case "!pbd":
@@ -351,7 +351,7 @@ function processCommands(client, user, commStr){
 			//PB1
 			if (commLen - 1 >= 1 && commands[1] !== '') {
 				if (isValidDrawMap(commands[1]) == false) {
-					client.action("laboratory424", user['display-name'] + ", Sorry, PBOT1 cannot draw this. Bad syntax in drawing.");
+					client.action(channel, user['display-name'] + ", Sorry, PBOT1 cannot draw this. Bad syntax in drawing.");
 				} else {
 					bDrawPB1 = true;
 				}
@@ -359,7 +359,7 @@ function processCommands(client, user, commStr){
 			//PB2
 			if (commLen - 1 >= 2 && commands[2] !== '') {
 				if (isValidDrawMap(commands[2]) == false) {
-					client.action("laboratory424", user['display-name'] + ", Sorry, PBOT2 cannot draw this. Bad syntax in drawing.");
+					client.action(channel, user['display-name'] + ", Sorry, PBOT2 cannot draw this. Bad syntax in drawing.");
 				} else {
 					bDrawPB2 = true;
 				}
@@ -367,7 +367,7 @@ function processCommands(client, user, commStr){
 			//PB3
 			if (commLen - 1 >= 3 && commands[3] !== '') {
 				if (isValidDrawMap(commands[3]) == false) {
-					client.action("laboratory424", user['display-name'] + ", Sorry, PBOT3 cannot draw this. Bad syntax in drawing.");
+					client.action(channel, user['display-name'] + ", Sorry, PBOT3 cannot draw this. Bad syntax in drawing.");
 				} else {
 					bDrawPB3 = true;
 				}
@@ -375,7 +375,7 @@ function processCommands(client, user, commStr){
 			//PB4
 			if (commLen - 1 >= 4 && commands[4] !== '') {
 				if (isValidDrawMap(commands[4]) == false) {
-					client.action("laboratory424", user['display-name'] + ", Sorry, PBOT4 cannot draw this. Bad syntax in drawing.");
+					client.action(channel, user['display-name'] + ", Sorry, PBOT4 cannot draw this. Bad syntax in drawing.");
 				} else {
 					bDrawPB4 = true;
 				}
@@ -405,7 +405,7 @@ function processCommands(client, user, commStr){
 				zlib.unzip(buffer, function (err, buffer) {
 					if (!err) {
 						var drawCommand = "!pbd." + buffer.toString();//Decoded & decompressed
-						processCommands(client, user, drawCommand);
+						processCommands(channel, client, user, drawCommand);
 					}
 					else {
 						console.log("ERROR UNCOMPRESSING!");
@@ -423,7 +423,7 @@ function processCommands(client, user, commStr){
 			//PB1
 			if (commLen - 1 >= 1 && commands[1] !== '') {
 				if (isValidDrawMap(commands[1]) == false) {
-					client.action("laboratory424", user['display-name'] + ", Sorry, PBOT1 cannot draw this. Bad syntax in drawing.");
+					client.action(channel, user['display-name'] + ", Sorry, PBOT1 cannot draw this. Bad syntax in drawing.");
 				} else {
 					bDrawPB1 = true;
 				}
@@ -431,7 +431,7 @@ function processCommands(client, user, commStr){
 			//PB2
 			if (commLen - 1 >= 2 && commands[2] !== '') {
 				if (isValidDrawMap(commands[2]) == false) {
-					client.action("laboratory424", user['display-name'] + ", Sorry, PBOT2 cannot draw this. Bad syntax in drawing.");
+					client.action(channel, user['display-name'] + ", Sorry, PBOT2 cannot draw this. Bad syntax in drawing.");
 				} else {
 					bDrawPB2 = true;
 				}
@@ -439,7 +439,7 @@ function processCommands(client, user, commStr){
 			//PB3
 			if (commLen - 1 >= 3 && commands[3] !== '') {
 				if (isValidDrawMap(commands[3]) == false) {
-					client.action("laboratory424", user['display-name'] + ", Sorry, PBOT3 cannot draw this. Bad syntax in drawing.");
+					client.action(channel, user['display-name'] + ", Sorry, PBOT3 cannot draw this. Bad syntax in drawing.");
 				} else {
 					bDrawPB3 = true;
 				}
@@ -447,7 +447,7 @@ function processCommands(client, user, commStr){
 			//PB4
 			if (commLen - 1 >= 4 && commands[4] !== '') {
 				if (isValidDrawMap(commands[4]) == false) {
-					client.action("laboratory424", user['display-name'] + ", Sorry, PBOT4 cannot draw this. Bad syntax in drawing.");
+					client.action(channel, user['display-name'] + ", Sorry, PBOT4 cannot draw this. Bad syntax in drawing.");
 				} else {
 					bDrawPB4 = true;
 				}
@@ -494,7 +494,7 @@ function processCommands(client, user, commStr){
 				}
 				loopFramesPB1(time);//Loop forever.
 			} else {
-				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
+				client.action(channel, user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
 			}
 			break;
 		case "!pb2a":
@@ -526,7 +526,7 @@ function processCommands(client, user, commStr){
 				}
 				loopFramesPB2(time);//Loop forever.
 			} else {
-				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
+				client.action(channel, user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
 			}
 			break;
 		case "!pb3a":
@@ -558,7 +558,7 @@ function processCommands(client, user, commStr){
 				}
 				loopFramesPB3(time);//Loop forever.
 			} else {
-				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
+				client.action(channel, user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
 			}
 			break;
 		case "!pb4a":
@@ -590,7 +590,7 @@ function processCommands(client, user, commStr){
 				}
 				loopFramesPB4(time);//Loop forever.
 			} else {
-				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
+				client.action(channel, user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
 			}
 			break;
 		case "!pba":
@@ -625,7 +625,7 @@ function processCommands(client, user, commStr){
 				}
 				loopAllFrames(time);//Loop forever.
 			} else {
-				client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
+				client.action(channel, user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
 			}
 			break;
 		case "!pbaz":
@@ -634,7 +634,7 @@ function processCommands(client, user, commStr){
 				if (!err) {
 					var drawCommand = "!pba." + buffer.toString();//Decoded & decompressed
 					//var drawCommand = "!pbax." + buffer.toString();//Decoded & decompressed
-					processCommands(client, user, drawCommand);
+					processCommands(channel, client, user, drawCommand);
 				}
 				else {
 					console.log("ERROR UNCOMPRESSING!");
@@ -659,9 +659,9 @@ function processCommands(client, user, commStr){
 					}
 					loopFrames(gPBOT1PicArray,time);
 					}else{
-				client.action("laboratory424",user['display-name'] + ", Sorry, Bad character in text.");
+				client.action(channel,user['display-name'] + ", Sorry, Bad character in text.");
 			}*/
-			client.action("laboratory424", user['display-name'] + ", Sorry, scroll feature disabled for now.");
+			client.action(channel, user['display-name'] + ", Sorry, scroll feature disabled for now.");
 			break;
 		case "!pbw"://TBD: Write and append long animations/pics to server.
 			break;
@@ -674,6 +674,7 @@ function processCommands(client, user, commStr){
 					//pbs.chatIn(user, "!bs.play");//TBD: pass in client?
 					break;
 				case "ttt": //TicTacToe
+					//Concept to invite: !pbg.ttt.[username], pass into init
 					//Set game mode to route messages
 					if (gameMode == ""){
 						gameMode = 'ttt';
@@ -942,7 +943,7 @@ function gameCommand(commStr){
 			}
 			loopAllDiffFrames(time);//Loop forever.
 		} else {
-			client.action("laboratory424", user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
+			client.action(channel, user['display-name'] + ", Sorry, PBOT cannot draw this. Bad syntax in drawing.");
 		}
 	} else if (commands[0] === "!pb1f") { //draw saved drawing to panel.
 		//Proto: To pull a saved drawing and display. Includes a credit to artist.
@@ -956,9 +957,9 @@ function gameCommand(commStr){
 			console.log("credit:" + strs[1]);
 			clearPanel(1);
 			setTimeout(function () { drawPicture(strs[0], 1); show(1); }, 500);
-			client.action("laboratory424", "  CREDIT: " + fileName + " on PixelBot1 is by " + strs[1]);
+			client.action(channel, "  CREDIT: " + fileName + " on PixelBot1 is by " + strs[1]);
 		} else {
-			client.action("laboratory424", user['display-name'] + ", Sorry, there isn't a saved drawing with that name.");
+			client.action(channel, user['display-name'] + ", Sorry, there isn't a saved drawing with that name.");
 		}
 	} else if (commands[0] === "!pb2f") { //draw saved drawing to panel.
 		var fileName = commands[1];
@@ -971,9 +972,9 @@ function gameCommand(commStr){
 			console.log("credit:" + strs[1]);
 			clearPanel(2);
 			setTimeout(function () { drawPicture(strs[0], 2); show(2); }, 500);
-			client.action("laboratory424", "  CREDIT: " + fileName + " on PixelBot2 is by " + strs[1]);
+			client.action(channel, "  CREDIT: " + fileName + " on PixelBot2 is by " + strs[1]);
 		} else {
-			client.action("laboratory424", user['display-name'] + ", Sorry, there isn't a saved drawing with that name.");
+			client.action(channel, user['display-name'] + ", Sorry, there isn't a saved drawing with that name.");
 		}
 	} else if (commands[0] === "!pb3f") { //draw saved drawing to panel.
 		var fileName = commands[1];
@@ -986,9 +987,9 @@ function gameCommand(commStr){
 			console.log("credit:" + strs[1]);
 			clearPanel(3);
 			setTimeout(function () { drawPicture(strs[0], 3); show(3); }, 500);
-			client.action("laboratory424", "  CREDIT: " + fileName + " on PixelBot3 is by " + strs[1]);
+			client.action(channel, "  CREDIT: " + fileName + " on PixelBot3 is by " + strs[1]);
 		} else {
-			client.action("laboratory424", user['display-name'] + ", Sorry, there isn't a saved drawing with that name.");
+			client.action(channel, user['display-name'] + ", Sorry, there isn't a saved drawing with that name.");
 		}
 	} else if (commands[0] === "!pb4f") { //draw saved drawing to panel.
 		var fileName = commands[1];
@@ -1001,9 +1002,9 @@ function gameCommand(commStr){
 			console.log("credit:" + strs[1]);
 			clearPanel(4);
 			setTimeout(function () { drawPicture(strs[0], 4); show(4); }, 500);
-			client.action("laboratory424", "  CREDIT: " + fileName + " on PixelBot4 is by " + strs[1]);
+			client.action(channel, "  CREDIT: " + fileName + " on PixelBot4 is by " + strs[1]);
 		} else {
-			client.action("laboratory424", user['display-name'] + ", Sorry, there isn't a saved drawing with that name.");
+			client.action(channel, user['display-name'] + ", Sorry, there isn't a saved drawing with that name.");
 		}
 	} else if (commands[0] === "!bs") {
 		//Game to try once pbot code cleaned up.
@@ -1119,7 +1120,7 @@ function setPix(pix, pixColorComm){
 	/////////////////////////////////////////////////
 	function say_text(words){
 		/*if(client != null){
-			client.action("laboratory424", words);
+			client.action(channel, words);
 		}else{
 			console.log("client is null!!!!");
 		}	*/

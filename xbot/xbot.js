@@ -14,7 +14,7 @@ strip = new pixel.Strip({
 var pixel = require("node-pixel");
 var five = require("johnny-five");
 var ports = [
-  { id: "XBOT", port: "COM11" }
+  { id: "XBOT", port: "COM5" }
   //{ id: "LBOT", port: "COM10" }
 	//{ id: "TBOT", port: "COM10" }
   //MAC TESTING ONLY
@@ -45,10 +45,9 @@ new five.Boards(ports).on("ready", function () {
 	  //xbotHW.svo_i = new five.Servo({pin:9, board:this.byId("XBOT")});
 	  //xbot.xbotHW.led = new five.Led({pin:2, board:this.byId("XBOT")});
 	  xbotHW.strip1 = new pixel.Strip({
-		board: this.byId("XBOT"),
-		controller: "FIRMATA",
-		strips: [ {pin: 6, length: 48}],
-		gamma: 2.8,
+      board: this.byId("XBOT"),
+	    controller: "I2CBACKPACK",
+      strips:[0,0,48],
 	  });
     init();
     
@@ -69,6 +68,9 @@ new five.Boards(ports).on("ready", function () {
 
 function init(){
     var color1 = '#FFFF00';//#FFFF00, daa520
+
+    console.log("INIT!");//temp
+
     //var color2 = '#ff0000';
     //Strip1
     //xbotHW.strip1.color(color1);

@@ -2,7 +2,7 @@
 //RESOURCES
 var cfg = require('../config.js');
 var pixel = require("node-pixel");
-var fs = require("fs");
+//var fs = require("fs");
 var zlib = require("zlib");
 //BOTS
 var pbot = require('./pbot/pbot.js');
@@ -55,7 +55,7 @@ client.on('chat', function (channel, user, message, self) {
 		bProcessed = processUser(user, message);	//USER
 	}
 	if (!bProcessed) {
-		bProcessed = processCommand(user, message);	//COMMANDS
+		bProcessed = processCommand(channel, user, message);	//COMMANDS
 	}
 	if (!bProcessed) {
 		bProcessed = ebot.processEmote(client, user, message);	//EMOTES
@@ -68,19 +68,19 @@ client.on("subscription", (channel, username, method, message, userstate) => {
 	var comm;
 
 	comm = "!pb1d."+ pic;
-	pbot.processCommands(client,username,comm);
+	pbot.processCommands(channel,client,username,comm);
 	comm = "!pb2d."+pic;
-	pbot.processCommands(client,username,comm);
+	pbot.processCommands(channel,client,username,comm);
 	comm = "!pb3d."+pic;
-	pbot.processCommands(client,username,comm);
+	pbot.processCommands(channel,client,username,comm);
 	comm = "!pb4d."+pic;
-	pbot.processCommands(client,username,comm);
+	pbot.processCommands(channel,client,username,comm);
 
 	//BBs
 	fbot.throwbbs();
 
 	//PPB Launcher
-	fbot.addToQue(client, username, "fire5", true);
+	fbot.addToQue(channel, client, username, "fire5", true);
 });
 
 //////////////////////////////////////////
@@ -91,19 +91,19 @@ client.on("resub", (channel, username, months, message, userstate, methods) => {
 	var comm;
 
 	comm = "!pb1d."+ pic;
-	pbot.processCommands(client,username,comm);
+	pbot.processCommands(channel,client,username,comm);
 	comm = "!pb2d."+pic;
-	pbot.processCommands(client,username,comm);
+	pbot.processCommands(channel,client,username,comm);
 	comm = "!pb3d."+pic;
-	pbot.processCommands(client,username,comm);
+	pbot.processCommands(channel,client,username,comm);
 	comm = "!pb4d."+pic;
-	pbot.processCommands(client,username,comm);
+	pbot.processCommands(channel,client,username,comm);
 
 	//BBs
 	fbot.throwbbs();
 
 	//PPB Launcher
-	fbot.addToQue(client, username, "fire3", true);
+	fbot.addToQue(channel, client, username, "fire3", true);
 });
 
 //////////////////////////////////////////
@@ -113,19 +113,19 @@ client.on("subgift", (channel, username, streakMonths, recipient, methods, users
 	var comm;
 
 	comm = "!pb1d."+ pic;
-	pbot.processCommands(client,username,comm);
+	pbot.processCommands(channel,client,username,comm);
 	comm = "!pb2d."+pic;
-	pbot.processCommands(client,username,comm);
+	pbot.processCommands(channel,client,username,comm);
 	comm = "!pb3d."+pic;
-	pbot.processCommands(client,username,comm);
+	pbot.processCommands(channel,client,username,comm);
 	comm = "!pb4d."+pic;
-	pbot.processCommands(client,username,comm);
+	pbot.processCommands(channel,client,username,comm);
 
 	//BBs
 	fbot.throwbbs();
 
 	//PPB Launcher
-	fbot.addToQue(client, username, "fire3", true);
+	fbot.addToQue(channel, client, username, "fire3", true);
 });
 
 //////////////////////////////////////////
@@ -134,19 +134,19 @@ client.on("giftpaidupgrade", (channel, username, sender, userstate) => {
 	var comm;
 
 	comm = "!pb1d."+ pic;
-	pbot.processCommands(client,username,comm);
+	pbot.processCommands(channel,client,username,comm);
 	comm = "!pb2d."+pic;
-	pbot.processCommands(client,username,comm);
+	pbot.processCommands(channel,client,username,comm);
 	comm = "!pb3d."+pic;
-	pbot.processCommands(client,username,comm);
+	pbot.processCommands(channel,client,username,comm);
 	comm = "!pb4d."+pic;
-	pbot.processCommands(client,username,comm);
+	pbot.processCommands(channel,client,username,comm);
 
 	//BBs
 	fbot.throwbbs();
 
 	//PPB Launcher
-	fbot.addToQue(client, username, "fire3", true);
+	fbot.addToQue(channel, client, username, "fire3", true);
 });
 
 //////////////////////////////////////////
@@ -155,19 +155,19 @@ client.on("anongiftpaidupgrade", (channel, username, userstate) => {
 	var comm;
 
 	comm = "!pb1d."+ pic;
-	pbot.processCommands(client,username,comm);
+	pbot.processCommands(channel,client,username,comm);
 	comm = "!pb2d."+pic;
-	pbot.processCommands(client,username,comm);
+	pbot.processCommands(channel,client,username,comm);
 	comm = "!pb3d."+pic;
-	pbot.processCommands(client,username,comm);
+	pbot.processCommands(channel,client,username,comm);
 	comm = "!pb4d."+pic;
-	pbot.processCommands(client,username,comm);
+	pbot.processCommands(channel,client,username,comm);
 
 	//BBs
 	fbot.throwbbs();
 
 	//PPB Launcher
-	fbot.addToQue(client, username, "fire3", true);
+	fbot.addToQue(channel,client, username, "fire3", true);
 });
 //////////////////////////////////////////
 //TBD: Bits -> Bot function. Provide ability to direct contribution to bot function.
@@ -178,15 +178,23 @@ client.on("cheer", (channel, userstate, message) => {
 	var bits = Number(userstate.bits);
 	var fireStr = "fire";
 	
-	if (bits >= 5 && bits < 20) {
+	/*if (bits >= 5 && bits < 20) {
 		fbot.throwbbs();
 		client.action("laboratory424", userstate['display-name'] + ", BBs deployed to make a mess for Jeff to clean!");
 	} else {
 		balls = Math.trunc(bits / 20);
 		if (balls > 6) { balls = 6; }
 		fireStr += balls;
-		fbot.addToQue(client, userstate, fireStr, true);
+		fbot.addToQue(channel, client, userstate, fireStr, true);
 		client.action("laboratory424", userstate['display-name'] + ", Ping Pong ball deployed to create chaos for Jeff!");
+	}*/
+	///TEMP, until BB Arm finished
+	if (bits >= 20) {
+		balls = Math.trunc(bits / 20);
+		if (balls > 6) { balls = 6; }
+		fireStr += balls;
+		fbot.addToQue(channel, client, userstate, fireStr, true);
+		client.action("laboratory424", userstate['display-name'] + ", Ping Pong balls deployed to create chaos for Jeff!");
 	}
 });
 
@@ -201,14 +209,14 @@ client.on("raided", (channel, username, viewers) => {
 	var pic = "";
 	var time = 500;
 
-	if (viewers >= 10) {
+	//if (viewers >= 10) {
 		//BBs
 		fbot.throwbbs();
 		//Launcher
-		fbot.addToQue(client, username, "fire6", true);
-	} else {
+		fbot.addToQue(channel, client, username, "fire4", true);
+	/*} else {
 		fbot.throwbbs();
-	}
+	}*/
 });
 
 //////////////////////////////////////////
@@ -224,7 +232,7 @@ function processEvent(user, message) {
 		if (weaponSelect == 0) { //Throw BBs
 			fbot.throwbbs();
 		} else if (weaponSelect == 1) { //Shoot a single ball on follow.
-			fbot.addToQue(client, user, "fire1", true);
+			fbot.addToQue("",client, user, "fire1", true);
 		}
 
 		bProcessed = true;
@@ -247,13 +255,13 @@ function processEvent(user, message) {
 		//Throw BBs
 		fbot.throwbbs();
 		//Launcher
-		fbot.addToQue(client, user, "fire2", true);
+		fbot.addToQue("",client, user, "fire2", true);
 
 		bProcessed = true;
 	} else if (user.username == "streamelements" && message.includes("PPB01") && !message.includes('@')) {
-		fbot.addToQue(client, user, "fire1", true);
+		fbot.addToQue("",client, user, "fire1", true);
 	} else if (user.username == "streamelements" && message.includes("PPB03") && !message.includes('@')) {
-		fbot.addToQue(client, user, "fire3", true);
+		fbot.addToQue("",client, user, "fire3", true);
 	}
 
 	return bProcessed;
@@ -265,7 +273,7 @@ function processUser(user, message) {
 	var bProcessed = false;
 
 	if(cfg.specialUsrPPB.includes(user.username) && message.includes("fire")){
-		fbot.addToQue(client, user, "fire4", true);
+		fbot.addToQue("",client, user, "fire4", true);
 		bProcessed = true;
 	}else if(cfg.specialUsrBBL.includes(user.username) && message.includes("throw")){
 		fbot.throwbbs();
@@ -276,14 +284,14 @@ function processUser(user, message) {
 		var comm;
 
 		comm = "!pb1d."+ pic;
-		pbot.processCommands(client,user,comm);
+		pbot.processCommands(channel,client,user,comm);
 		comm = "!pb2d."+pic;
-		pbot.processCommands(client,user,comm);
+		pbot.processCommands(channel,client,user,comm);
 		comm = "!pb3d."+pic;
-		pbot.processCommands(client,user,comm);
+		pbot.processCommands(channel,client,user,comm);
 		comm = "!pb4d."+pic;
-		pbot.processCommands(client,user,comm);
-		fbot.addToQue(client, user, "fire2", true);
+		pbot.processCommands(channel,client,user,comm);
+		fbot.addToQue("",client, user, "fire2", true);
 		bProcessed = true;
 	}
 
@@ -292,7 +300,7 @@ function processUser(user, message) {
 
 //////////////////////////////////////////
 //Main Bot Control Commands
-function processCommand(user, message) {
+function processCommand(channel, user, message) {
 	var bProcessed = false;
 	var i;
 	var time = 1000;
@@ -306,11 +314,21 @@ function processCommand(user, message) {
 			ebot.processCommands(client, user, commStr);
 			break;
 		case "!eb1a":
-			client.action("laboratory424", user['display-name'] + ", !eb1a no longer supported. Use !eb1 instead.");
+			client.action(channel, user['display-name'] + ", !eb1a no longer supported. Use !eb1 instead.");
 			break;
 		case "!fb1":
-			commStr = commands.slice(1).join(".");//temp, fix in fbot.js
-			fbot.addToQue(client, user, commStr);
+			commStr = commands.slice(1).join(".");//temp, fix in //fbot.js
+			fbot.addToQue(channel, client, user, commStr);
+			break;
+		case "!fb1r"://These are un-queued functions.
+		case "!fb1a":
+		case "!fb1d":
+		case "!fb1x":
+		case "!fb1p":
+		case "!fb1i":
+		case "!fb1w"://TEMP, TESTING
+			//TBD: Validate input
+			fbot.processExtendedCommand(commStr);
 			break;
 		case "!xb1":
 		case "!xb1r":
@@ -352,7 +370,7 @@ function processCommand(user, message) {
 		case "!pbg":
 		case "!pbgx"://TEMP! Clears game mode.
 		case "!ttt"://TEMP! This is unfortunate, but good enough for now.
-			pbot.processCommands(client, user, commStr);
+			pbot.processCommands(channel, client, user, commStr);
 			break;
 	}
 	return bProcessed;
